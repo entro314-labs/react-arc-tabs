@@ -129,12 +129,12 @@
   font-size: 1rem;
 }
 
-.arc-tabs__tab:not([aria-selected="true"]):not(:disabled):hover {
+.arc-tabs__tab:not([aria-selected='true']):not(:disabled):hover {
   background: var(--arc-tab-hover-bg);
   transform: translateY(1px);
 }
 
-.arc-tabs__tab:not([aria-selected="true"]):not(:disabled):active {
+.arc-tabs__tab:not([aria-selected='true']):not(:disabled):active {
   transform: translateY(2px);
 }
 
@@ -150,7 +150,7 @@
 
 .arc-tabs__tab::before,
 .arc-tabs__tab::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   width: calc(var(--arc-radius) + var(--arc-border-width));
@@ -165,8 +165,8 @@
     transform var(--arc-motion-duration) var(--arc-motion-easing);
 }
 
-.arc-tabs__tab[aria-selected="true"]::before,
-.arc-tabs__tab[aria-selected="true"]::after {
+.arc-tabs__tab[aria-selected='true']::before,
+.arc-tabs__tab[aria-selected='true']::after {
   opacity: 1;
 }
 
@@ -175,8 +175,7 @@
 }
 
 .arc-tabs__tab:not(:first-child)::before {
-  transform: translateX(-100%)
-    translateY(calc(var(--arc-gap) + var(--arc-border-width)));
+  transform: translateX(-100%) translateY(calc(var(--arc-gap) + var(--arc-border-width)));
   border-bottom-right-radius: var(--arc-radius);
   box-shadow: var(--arc-border-width) var(--arc-radius) 0 var(--arc-panel-bg);
 }
@@ -186,14 +185,12 @@
 }
 
 .arc-tabs__tab:not(:last-child)::after {
-  transform: translateX(100%)
-    translateY(calc(var(--arc-gap) + var(--arc-border-width)));
+  transform: translateX(100%) translateY(calc(var(--arc-gap) + var(--arc-border-width)));
   border-bottom-left-radius: var(--arc-radius);
-  box-shadow: calc(var(--arc-border-width) * -1) var(--arc-radius) 0
-    var(--arc-panel-bg);
+  box-shadow: calc(var(--arc-border-width) * -1) var(--arc-radius) 0 var(--arc-panel-bg);
 }
 
-.arc-tabs__tab[aria-selected="true"] {
+.arc-tabs__tab[aria-selected='true'] {
   z-index: 3;
   color: color-mix(in srgb, var(--arc-accent) 85%, black 15%);
   border-color: var(--arc-panel-bg);
@@ -203,7 +200,7 @@
   box-shadow: 0 calc(var(--arc-gap) + var(--arc-border-width)) 0 var(--arc-panel-bg);
 }
 
-.arc-tabs--motion-expressive .arc-tabs__tab[aria-selected="true"] {
+.arc-tabs--motion-expressive .arc-tabs__tab[aria-selected='true'] {
   background: transparent;
 }
 

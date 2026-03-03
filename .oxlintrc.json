@@ -1,0 +1,253 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  "plugins": [
+    "oxc",
+    "typescript",
+    "unicorn",
+    "import",
+    "promise",
+    "vitest"
+    // no react, no jsx-a11y, no nextjs
+  ],
+
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+
+  "globals": {
+    "NodeJS": "readonly"
+  },
+
+  "rules": {
+    // ─── Correctness ─────────────────────────────────────────────────────────
+
+    "no-const-assign": "error",
+    "no-this-before-super": "error",
+    "no-unsafe-finally": "error",
+    "no-unsafe-optional-chaining": "error",
+    "no-unsafe-negation": "error",
+    "no-setter-return": "error",
+    "no-constructor-return": "error",
+    "no-obj-calls": "error",
+    "no-dupe-keys": "error",
+    "no-dupe-class-members": "error",
+    "no-duplicate-case": "error",
+    "no-fallthrough": "error",
+    "no-func-assign": "error",
+    "no-class-assign": "error",
+    "no-import-assign": "error",
+    "no-redeclare": "error",
+    "no-shadow-restricted-names": "error",
+    "no-ex-assign": "error",
+    "use-isnan": "error",
+    "valid-typeof": ["error", { "requireStringLiterals": true }],
+    "no-compare-neg-zero": "error",
+    "no-loss-of-precision": "error",
+    "no-self-compare": "error",
+
+    // ─── Variables ────────────────────────────────────────────────────────────
+
+    "no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "none",
+        "ignoreRestSiblings": true,
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "no-unused-private-class-members": "warn",
+    "no-empty-pattern": "warn",
+    "no-debugger": "off",
+
+    // ─── Best practices ───────────────────────────────────────────────────────
+
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-else-return": "error",
+    "no-array-constructor": "error",
+    // CLIs log output intentionally — console is the interface
+    "no-console": "off",
+    "no-void": ["error", { "allowAsStatement": true }],
+    "no-useless-concat": "error",
+    "no-useless-catch": "warn",
+    "no-useless-constructor": "warn",
+    "new-cap": ["error", { "properties": false }],
+    "prefer-destructuring": ["error", { "array": false, "object": true }],
+    "prefer-object-has-own": "error",
+    "prefer-template": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "prefer-promise-reject-errors": "error",
+    "radix": ["error", "as-needed"],
+
+    // ─── OXC ─────────────────────────────────────────────────────────────────
+
+    "oxc/approx-constant": "error",
+    "oxc/misrefactored-assign-op": "error",
+    "oxc/no-accumulating-spread": "off",
+    "oxc/no-map-spread": "warn",
+
+    // ─── TypeScript ───────────────────────────────────────────────────────────
+
+    "typescript/no-explicit-any": "error",
+    "typescript/no-confusing-void-expression": "error",
+    "typescript/no-invalid-void-type": "error",
+    "typescript/no-unsafe-declaration-merging": "warn",
+    "typescript/no-extraneous-class": "error",
+    "typescript/no-import-type-side-effects": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/array-type": ["error", { "default": "array-simple" }],
+    "typescript/ban-ts-comment": [
+      "error",
+      {
+        "ts-expect-error": "allow-with-description",
+        "ts-ignore": true,
+        "ts-nocheck": true,
+        "minimumDescriptionLength": 3
+      }
+    ],
+    "typescript/ban-tslint-comment": "error",
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/consistent-indexed-object-style": ["error", "record"],
+    "typescript/consistent-type-assertions": "error",
+    "typescript/consistent-type-definitions": ["error", "interface"],
+    "typescript/consistent-type-imports": ["error", { "fixStyle": "separate-type-imports" }],
+    "typescript/prefer-enum-initializers": "error",
+    "typescript/prefer-includes": "error",
+    "typescript/prefer-ts-expect-error": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+
+    // type-aware — enable with: oxlint --type-aware -c cli.oxlintrc.json
+    "typescript/await-thenable": "error",
+    "typescript/no-misused-promises": ["error", { "checksVoidReturn": false }],
+    "typescript/no-unnecessary-type-arguments": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/no-unsafe-enum-comparison": "error",
+    "typescript/prefer-nullish-coalescing": "error",
+    "typescript/return-await": ["error", "error-handling-correctness-only"],
+    "typescript/unbound-method": "off",
+
+    // ─── Import ───────────────────────────────────────────────────────────────
+
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    "import/default": "error",
+    "import/namespace": "error",
+    "import/no-cycle": ["error", { "maxDepth": 3 }],
+    "import/no-duplicates": "error",
+    "import/no-named-as-default": "error",
+    "import/no-named-as-default-member": "error",
+    "import/no-self-import": "error",
+
+    // ─── Promise ──────────────────────────────────────────────────────────────
+
+    "promise/always-return": "error",
+    "promise/no-callback-in-promise": "error",
+
+    // ─── Unicorn (Node-focused) ───────────────────────────────────────────────
+
+    "unicorn/catch-error-name": ["error", { "name": "err" }],
+    "unicorn/consistent-assert": "error",
+    "unicorn/consistent-date-clone": "error",
+    "unicorn/consistent-empty-array-spread": "error",
+    "unicorn/consistent-existence-index-check": "error",
+    "unicorn/consistent-indexed-object-style": ["error", "record"],
+    "unicorn/error-message": "error",
+    "unicorn/escape-case": "error",
+    "unicorn/no-anonymous-default-export": "error",
+    "unicorn/no-console-spaces": "error", // still enforce clean console output
+    "unicorn/no-hex-escape": "error",
+    "unicorn/no-immediate-mutation": "error",
+    "unicorn/no-instanceof-array": "error",
+    "unicorn/no-instanceof-builtins": "error",
+    "unicorn/no-length-as-slice-end": "error",
+    "unicorn/no-object-as-default-parameter": "error",
+    "unicorn/no-typeof-undefined": "error",
+    "unicorn/no-unnecessary-array-splice-count": "error",
+    "unicorn/no-useless-collection-argument": "error",
+    "unicorn/numeric-separators-style": "error",
+    "unicorn/prefer-array-find": "error",
+    "unicorn/prefer-array-flat": "error",
+    "unicorn/prefer-array-flat-map": "error",
+    "unicorn/prefer-array-some": "error",
+    "unicorn/prefer-at": "error",
+    "unicorn/prefer-code-point": "error",
+    "unicorn/prefer-date-now": "error",
+    "unicorn/prefer-global-this": "error",
+    "unicorn/prefer-includes": "error",
+    "unicorn/prefer-math-min-max": "error",
+    "unicorn/prefer-native-coercion-functions": "error",
+    "unicorn/prefer-node-protocol": "error", // critical for CLI: import 'node:fs' not 'fs'
+    "unicorn/prefer-number-properties": "error",
+    "unicorn/prefer-regexp-test": "error",
+    "unicorn/prefer-set-has": "error",
+    "unicorn/prefer-spread": "error",
+    "unicorn/prefer-string-slice": "error",
+    "unicorn/prefer-type-error": "error",
+    "unicorn/require-number-to-fixed-digits-argument": "error",
+
+    // DOM rules — irrelevant for CLI, disabled explicitly
+    "unicorn/prefer-dom-node-dataset": "off",
+    "unicorn/prefer-dom-node-text-content": "off",
+    "unicorn/prefer-keyboard-event-key": "off",
+    "unicorn/prefer-modern-dom-apis": "off",
+    "unicorn/relative-url-style": "off"
+  },
+
+  "overrides": [
+    {
+      // Entry points / bin files — process.exit and top-level async are common
+      "files": ["**/bin/**/*.{js,ts}", "**/cli.{js,ts}", "**/index.{js,ts}", "**/main.{js,ts}"],
+      "rules": {
+        "unicorn/no-process-exit": "off",
+        "promise/always-return": "off"
+      }
+    },
+    {
+      // Config files used by the CLI tool itself
+      "files": [
+        "*.config.{js,ts,mjs,cjs}",
+        "tsup.config.{js,ts}",
+        "tsconfig*.json",
+        "vitest.config.{js,ts}",
+        "rollup.config.{js,ts}"
+      ],
+      "rules": {
+        "unicorn/no-anonymous-default-export": "off"
+      }
+    },
+    {
+      // Test files
+      "files": ["**/*.{test,spec}.{js,ts}", "**/__tests__/**", "**/test/**", "**/tests/**"],
+      "rules": {
+        "typescript/no-explicit-any": "off",
+        "no-unused-vars": "off",
+        "promise/always-return": "off"
+      }
+    },
+    {
+      // Type declaration files
+      "files": ["**/*.d.ts", "**/types/**/*.ts"],
+      "rules": {
+        "typescript/no-explicit-any": "warn",
+        "no-unused-vars": "off"
+      }
+    },
+    {
+      // Scripts — loose everything, these are automation glue
+      "files": ["**/scripts/**/*.{js,ts}"],
+      "rules": {
+        "typescript/no-explicit-any": "off",
+        "promise/always-return": "off",
+        "promise/no-callback-in-promise": "off"
+      }
+    }
+  ]
+}

@@ -1,43 +1,32 @@
-# react-arc-tabs
+# @entro314labs/react-arc-tabs
 
-Production-ready, reusable arc-style tabs for React and Next.js.
+Reusable arc-style tabs component for React and Next.js, including a Tailwind CSS v4+ variant.
 
-This component is based on the shared visual mechanics from the demos in this workspace:
+## Highlights
 
-- active tab merges into the panel
-- inverse curved bottom corners on the active tab seam
-- layered z-index and pseudo-element geometry for seamless arc transitions
-- keyboard and ARIA-compliant tab interactions
+- Accessible tabs: ARIA roles + keyboard interactions
+- Controlled and uncontrolled state models
+- CSS-based and Tailwind v4+ variants
+- Switch animations (including sliding active backdrop and animated panel entry)
+- TypeScript-first API
 
-## Features
+## Compatibility
 
-- Controlled and uncontrolled usage
-- Full keyboard navigation (`ArrowLeft`, `ArrowRight`, `Home`, `End`, `Enter`, `Space`)
-- Disabled tabs support
-- Manual or automatic activation mode
-- Keep mounted or render-only-active panel strategies
-- Themeable with CSS variables and props
-- Two styling engines:
-  - `ArcTabs` (CSS file based)
-  - `ArcTabsTailwind` (Tailwind CSS v4+ utility based)
-- Built-in tab switch animations adapted from the demos:
-  - sliding active backdrop (`rounded-tab` inspired)
-  - smooth seam/corner transitions (`inverse rounded corners` inspired)
-  - animated panel entry with directional motion
-- Works in React and Next.js (`"use client"` included)
+- React `18.2+` and `19+`
+- Next.js (App Router and Pages Router)
+- Tailwind CSS `4+` for `ArcTabsTailwind`
 
-## Install (local package / workspace package)
+## Install
 
 ```bash
-npm install
-npm run build
+npm install @entro314labs/react-arc-tabs
 ```
 
-## Usage in React
+## Basic usage (CSS variant)
 
 ```tsx
-import { ArcTabs, type ArcTabItem } from "react-arc-tabs";
-import "react-arc-tabs/styles.css";
+import { ArcTabs, type ArcTabItem } from "@entro314labs/react-arc-tabs";
+import "@entro314labs/react-arc-tabs/styles.css";
 
 const items: ArcTabItem[] = [
   { id: "overview", label: "Overview", content: <div>Overview content</div> },
@@ -50,24 +39,20 @@ export function Example() {
     <ArcTabs
       items={items}
       defaultValue="overview"
-      size="md"
-      fit="content"
       motionPreset="expressive"
       motionDuration={320}
-      activationMode="automatic"
       ariaLabel="Project sections"
-      accentColor="#5b4ff1"
     />
   );
 }
 ```
 
-## Usage with Tailwind CSS 4+
+## Tailwind CSS v4+ usage
 
-`ArcTabsTailwind` renders with Tailwind utility classes (including pseudo-element arc geometry), so you don't need to import `styles.css`.
+`ArcTabsTailwind` ships with utility-class styling, so you do not import `styles.css`.
 
 ```tsx
-import { ArcTabsTailwind, type ArcTabItem } from "react-arc-tabs";
+import { ArcTabsTailwind, type ArcTabItem } from "@entro314labs/react-arc-tabs";
 
 const items: ArcTabItem[] = [
   { id: "overview", label: "Overview", content: <div>Overview content</div> },
@@ -82,10 +67,6 @@ export function ExampleTailwind() {
       defaultValue="overview"
       fit="equal"
       motionPreset="expressive"
-      motionDuration={320}
-      activationMode="automatic"
-      ariaLabel="Project sections"
-      accentColor="#4f46e5"
       classNames={{
         root: "max-w-3xl",
         panel: "prose prose-sm max-w-none"
@@ -95,27 +76,22 @@ export function ExampleTailwind() {
 }
 ```
 
-### Tailwind v4 source scanning (important)
+### Tailwind source scanning
 
-If Tailwind doesn't generate the component classes from node modules in your setup, add an explicit source path in your global stylesheet:
+If your setup does not automatically scan classes from installed dependencies, add:
 
 ```css
 @import "tailwindcss";
-
-/* npm/yarn/pnpm install use-case */
-@source "../node_modules/react-arc-tabs/dist/**/*.{js,cjs}";
-
-/* monorepo/local workspace use-case (adjust path) */
-/* @source "../../packages/react-arc-tabs/src/**/*.{ts,tsx}"; */
+@source "../node_modules/@entro314labs/react-arc-tabs/dist/**/*.{js,cjs}";
 ```
 
-## Usage in Next.js App Router
+## Next.js usage
 
 ```tsx
 "use client";
 
-import { ArcTabs, type ArcTabItem } from "react-arc-tabs";
-import "react-arc-tabs/styles.css";
+import { ArcTabs, type ArcTabItem } from "@entro314labs/react-arc-tabs";
+import "@entro314labs/react-arc-tabs/styles.css";
 
 const tabs: ArcTabItem[] = [
   { id: "summary", label: "Summary", content: <div>Summary panel</div> },
@@ -128,40 +104,19 @@ export default function Page() {
 }
 ```
 
-### Next.js + Tailwind variant
+## Motion presets
+
+- `none`: no animation
+- `subtle`: minimal transitions (default)
+- `expressive`: sliding active backdrop + stronger panel motion
 
 ```tsx
-"use client";
-
-import { ArcTabsTailwind, type ArcTabItem } from "react-arc-tabs";
-
-const tabs: ArcTabItem[] = [
-  { id: "summary", label: "Summary", content: <div>Summary panel</div> },
-  { id: "billing", label: "Billing", content: <div>Billing panel</div> },
-  { id: "usage", label: "Usage", content: <div>Usage panel</div> }
-];
-
-export default function Page() {
-  return <ArcTabsTailwind items={tabs} defaultValue="summary" ariaLabel="Account tabs" />;
-}
+<ArcTabs motionPreset="expressive" motionDuration={320} />
 ```
 
-## Styling model
+## Main API
 
-You can theme via props or by overriding CSS variables on `.arc-tabs`:
-
-- `--arc-radius`
-- `--arc-gap`
-- `--arc-accent`
-- `--arc-tab-bg`
-- `--arc-tab-hover-bg`
-- `--arc-panel-bg`
-- `--arc-panel-border`
-- `--arc-panel-padding`
-
-## API
-
-`ArcTabs` props:
+### `ArcTabs` / `ArcTabsTailwind`
 
 - `items: ArcTabItem[]`
 - `value?: string`
@@ -173,39 +128,19 @@ You can theme via props or by overriding CSS variables on `.arc-tabs`:
 - `motionPreset?: "none" | "subtle" | "expressive"`
 - `motionDuration?: number`
 - `keepMounted?: boolean`
-- `radius?: number`
-- `gap?: number`
-- `panelPadding?: number | string`
-- `accentColor?: string`
-- `tabBackground?: string`
-- `tabHoverBackground?: string`
-- `panelBackground?: string`
-- `panelBorderColor?: string`
-- `renderTabLabel?: (item, state) => ReactNode`
-- `renderPanel?: (item, state) => ReactNode`
+- `ariaLabel?: string`
 
-`ArcTabsTailwind` props:
+Additional styling/theming props are available for both variants.
 
-- all `ArcTabs` props
-- `classNames?: ArcTabsTailwindClassNames`
+### Tailwind slot overrides
 
-`ArcTabsTailwindClassNames` slots:
+`ArcTabsTailwind` supports `classNames` slots:
 
-- `root`
-- `list`
-- `indicator`
-- `item`
-- `tab`
-- `tabSelected`
-- `tabUnselected`
-- `tabDisabled`
-- `icon`
-- `text`
-- `badge`
-- `panels`
-- `panel`
+- `root`, `list`, `indicator`, `item`, `tab`
+- `tabSelected`, `tabUnselected`, `tabDisabled`
+- `icon`, `text`, `badge`, `panels`, `panel`
 
-`ArcTabItem`:
+### `ArcTabItem`
 
 - `id: string`
 - `label: ReactNode`
@@ -213,3 +148,15 @@ You can theme via props or by overriding CSS variables on `.arc-tabs`:
 - `disabled?: boolean`
 - `icon?: ReactNode`
 - `badge?: ReactNode`
+
+## Development
+
+```bash
+pnpm install
+pnpm run typecheck
+pnpm run build
+```
+
+## License
+
+MIT

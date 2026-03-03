@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "bracketSpacing": true,
+  "quoteProps": "as-needed",
+  "objectWrap": "preserve",
+  "endOfLine": "lf",
+  "insertFinalNewline": true,
+  "embeddedLanguageFormatting": "off", // no embedded languages in CLI code
+  "proseWrap": "preserve",
+
+  // JSX options omitted — no JSX in CLI projects
+
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+  ],
+
+  "sortImports": {
+    "groups": [
+      "builtin",
+      "external",
+      ["internal", "subpath"],
+      ["parent", "sibling", "index"],
+      "unknown",
+      // no "style" group — CLIs don't import CSS
+    ],
+    "internalPattern": ["~/", "@/", "#"],
+    "newlinesBetween": true,
+    "order": "asc",
+    "ignoreCase": true,
+    "sortSideEffects": false,
+  },
+
+  "sortPackageJson": true,
+
+  "overrides": [
+    {
+      // Markdown docs — don't reformat prose
+      "files": ["**/*.md"],
+      "options": {
+        "proseWrap": "preserve",
+        "printWidth": 120,
+      },
+    },
+  ],
+}

@@ -1,13 +1,34 @@
 {
-  "name": "react-arc-tabs",
-  "version": "1.0.0",
-  "private": true,
+  "name": "@entro314labs/react-arc-tabs",
+  "version": "1.0.1",
+  "private": false,
   "description": "Reusable arc-style tabs component for React and Next.js projects",
+  "keywords": [
+    "accessible",
+    "component-library",
+    "nextjs",
+    "react",
+    "tabs",
+    "tailwindcss",
+    "ui"
+  ],
+  "homepage": "https://github.com/entro314-labs/react-arc-tabs#readme",
+  "bugs": {
+    "url": "https://github.com/entro314-labs/react-arc-tabs/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/entro314-labs/react-arc-tabs.git"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -18,21 +39,33 @@
     },
     "./styles.css": "./dist/ArcTabs.css"
   },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean && cp src/ArcTabs.css dist/ArcTabs.css",
-    "typecheck": "tsc --noEmit"
+  "publishConfig": {
+    "access": "public"
   },
-  "peerDependencies": {
-    "react": "^19.0.0 || ^19.2.4",
-    "react-dom": "^19.0.0 || ^19.2.4"
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean && cp src/ArcTabs.css dist/ArcTabs.css",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm run build",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "lint:fix-unsafe": "oxlint --import-plugin   --type-aware --type-check --vitest-plugin --fix --fix-suggestions --fix-dangerously .",
+    "check:fix-suggestions": "oxlint --import-plugin   --type-aware --type-check --vitest-plugin --fix --fix-suggestions . && oxfmt --write ."
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tsup": "^8.5.1",
-    "typescript": "beta"
-  }
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0 || ^19.2.4",
+    "react-dom": "^19.0.0 || ^19.2.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@10.30.3"
 }
