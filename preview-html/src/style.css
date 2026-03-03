@@ -1,0 +1,91 @@
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    sans-serif;
+  background:
+    radial-gradient(circle at 20% 0%, #edf1ff 0, #edf1ff 30%, #f7f9ff 60%, #fcfdff 100%),
+    #f6f8ff;
+  color: #111a33;
+}
+
+.preview-page {
+  width: min(980px, 94vw);
+  margin: 2.5rem auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.preview-header {
+  background: #ffffffd9;
+  backdrop-filter: blur(8px);
+  border: 1px solid #d8def5;
+  border-radius: 16px;
+  padding: 1rem 1.2rem;
+}
+
+.preview-header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.preview-header p {
+  margin: 0.5rem 0 0;
+  color: #334;
+}
+
+.preview-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.4rem;
+  background: #ffffffd9;
+  backdrop-filter: blur(8px);
+  border: 1px solid #d8def5;
+  border-radius: 16px;
+  padding: 0.85rem 1.1rem;
+}
+
+.preview-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.preview-controls input[type='range'] {
+  width: 180px;
+}
+
+.preview-controls output {
+  min-width: 3.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #3f4d80;
+}
+
+.preview-canvas {
+  background: #ffffffd0;
+  backdrop-filter: blur(6px);
+  border: 1px solid #d8def5;
+  border-radius: 16px;
+  padding: 1.2rem;
+}
+
+.arc-tabs__panel h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.arc-tabs__panel p {
+  margin: 0.55rem 0 0;
+  color: #37447a;
+}

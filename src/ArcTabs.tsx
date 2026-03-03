@@ -164,6 +164,7 @@ export function ArcTabs({
   const enabledIndices = React.useMemo(() => getEnabledIndices(items), [items])
 
   const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([])
+  const listScrollRef = React.useRef<HTMLDivElement | null>(null)
   const listRef = React.useRef<HTMLUListElement | null>(null)
   const activePanelRef = React.useRef<HTMLElement | null>(null)
   const hasMountedRef = React.useRef(false)
@@ -246,15 +247,13 @@ export function ArcTabs({
       return
     }
 
-    const listElement = listRef.current
     const selectedTab = selectedIndex >= 0 ? (tabRefs.current[selectedIndex] ?? null) : null
+    const listElement = listRef.current
 
     if (!listElement || !selectedTab) return
 
-    const listRect = listElement.getBoundingClientRect()
-    const tabRect = selectedTab.getBoundingClientRect()
-    const nextX = tabRect.left - listRect.left + listElement.scrollLeft
-    const nextWidth = tabRect.width
+    const nextX = selectedTab.offsetLeft
+    const nextWidth = selectedTab.offsetWidth
 
     setIndicator((previous) => {
       const changedX = Math.abs(previous.x - nextX) > 0.5
@@ -279,12 +278,10 @@ export function ArcTabs({
     if (!showSlidingIndicator) return
 
     const listElement = listRef.current
+    const listScrollElement = listScrollRef.current
     if (!listElement) return
 
     const onResize = () => {
-      syncIndicator()
-    }
-    const onScroll = () => {
       syncIndicator()
     }
 
@@ -296,17 +293,18 @@ export function ArcTabs({
         syncIndicator()
       })
       observer.observe(listElement)
+      if (listScrollElement) {
+        observer.observe(listScrollElement)
+      }
       tabRefs.current.forEach((tabElement) => {
         if (tabElement) observer?.observe(tabElement)
       })
     }
 
-    listElement.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize)
 
     return () => {
       cancelAnimationFrame(frame)
-      listElement.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
       observer?.disconnect()
     }
@@ -452,6 +450,7 @@ export function ArcTabs({
     if (panelBorderColor) {
       cssVars['--arc-panel-border'] = panelBorderColor
     }
+    cssVars['--arc-notch'] = 'clamp(6px, calc(var(--arc-radius) * 0.58), 12px)'
     cssVars['--arc-motion-duration'] = `${effectiveMotionDuration}ms`
 
     return cssVars
@@ -499,65 +498,67 @@ export function ArcTabs({
 
   return (
     <div className={rootClassName} style={themedStyle} {...rest}>
-      <ul
-        ref={listRef}
-        className={joinClassNames('arc-tabs__list', tabsClassName)}
-        role="tablist"
-        aria-label={ariaLabel}
-        id={`${baseId}-list`}
-      >
-        {showSlidingIndicator ? (
-          <li
-            aria-hidden="true"
-            role="presentation"
-            className={joinClassNames('arc-tabs__active-indicator', indicator.ready && 'is-ready')}
-            style={indicatorStyle}
-          />
-        ) : null}
+      <div ref={listScrollRef} className="arc-tabs__list-scroll">
+        <ul
+          ref={listRef}
+          className={joinClassNames('arc-tabs__list', tabsClassName)}
+          role="tablist"
+          aria-label={ariaLabel}
+          id={`${baseId}-list`}
+        >
+          {showSlidingIndicator ? (
+            <li
+              aria-hidden="true"
+              role="presentation"
+              className={joinClassNames('arc-tabs__active-indicator', indicator.ready && 'is-ready')}
+              style={indicatorStyle}
+            />
+          ) : null}
 
-        {items.map((item, index) => {
-          const selected = index === selectedIndex
-          const disabled = Boolean(item.disabled)
-          const tabId = `${baseId}-tab-${index}`
-          const panelId = `${baseId}-panel-${index}`
-          const state: ArcTabsRenderState = { index, selected, disabled }
+          {items.map((item, index) => {
+            const selected = index === selectedIndex
+            const disabled = Boolean(item.disabled)
+            const tabId = `${baseId}-tab-${index}`
+            const panelId = `${baseId}-panel-${index}`
+            const state: ArcTabsRenderState = { index, selected, disabled }
 
-          const tabIndexValue = disabled
-            ? -1
-            : focusedIndex === index || (focusedIndex === -1 && selected)
-              ? 0
-              : -1
+            const tabIndexValue = disabled
+              ? -1
+              : focusedIndex === index || (focusedIndex === -1 && selected)
+                ? 0
+                : -1
 
-          return (
-            <li className="arc-tabs__item" key={item.id} role="presentation">
-              <button
-                id={tabId}
-                ref={(node) => {
-                  tabRefs.current[index] = node
-                }}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                aria-controls={panelId}
-                tabIndex={tabIndexValue}
-                disabled={disabled}
-                className="arc-tabs__tab"
-                onFocus={() => {
-                  setFocusedIndex(index)
-                }}
-                onClick={() => {
-                  selectTab(index)
-                }}
-                onKeyDown={(event) => {
-                  handleTabKeyDown(event, index)
-                }}
-              >
-                {renderTabLabel ? renderTabLabel(item, state) : renderDefaultLabel(item)}
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+            return (
+              <li className="arc-tabs__item" key={item.id} role="presentation">
+                <button
+                  id={tabId}
+                  ref={(node) => {
+                    tabRefs.current[index] = node
+                  }}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls={panelId}
+                  tabIndex={tabIndexValue}
+                  disabled={disabled}
+                  className="arc-tabs__tab"
+                  onFocus={() => {
+                    setFocusedIndex(index)
+                  }}
+                  onClick={() => {
+                    selectTab(index)
+                  }}
+                  onKeyDown={(event) => {
+                    handleTabKeyDown(event, index)
+                  }}
+                >
+                  {renderTabLabel ? renderTabLabel(item, state) : renderDefaultLabel(item)}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
 
       <div className={joinClassNames('arc-tabs__panels', panelClassName)}>
         {items.length === 0 && emptyState}

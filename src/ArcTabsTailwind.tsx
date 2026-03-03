@@ -145,6 +145,7 @@ export function ArcTabsTailwind({
   const enabledIndices = React.useMemo(() => getEnabledIndices(items), [items])
 
   const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([])
+  const listScrollRef = React.useRef<HTMLDivElement | null>(null)
   const listRef = React.useRef<HTMLUListElement | null>(null)
   const activePanelRef = React.useRef<HTMLElement | null>(null)
   const hasMountedRef = React.useRef(false)
@@ -227,15 +228,13 @@ export function ArcTabsTailwind({
       return
     }
 
-    const listElement = listRef.current
     const selectedTab = selectedIndex >= 0 ? (tabRefs.current[selectedIndex] ?? null) : null
+    const listElement = listRef.current
 
     if (!listElement || !selectedTab) return
 
-    const listRect = listElement.getBoundingClientRect()
-    const tabRect = selectedTab.getBoundingClientRect()
-    const nextX = tabRect.left - listRect.left + listElement.scrollLeft
-    const nextWidth = tabRect.width
+    const nextX = selectedTab.offsetLeft
+    const nextWidth = selectedTab.offsetWidth
 
     setIndicator((previous) => {
       const changedX = Math.abs(previous.x - nextX) > 0.5
@@ -260,12 +259,10 @@ export function ArcTabsTailwind({
     if (!showSlidingIndicator) return
 
     const listElement = listRef.current
+    const listScrollElement = listScrollRef.current
     if (!listElement) return
 
     const onResize = () => {
-      syncIndicator()
-    }
-    const onScroll = () => {
       syncIndicator()
     }
 
@@ -277,17 +274,18 @@ export function ArcTabsTailwind({
         syncIndicator()
       })
       observer.observe(listElement)
+      if (listScrollElement) {
+        observer.observe(listScrollElement)
+      }
       tabRefs.current.forEach((tabElement) => {
         if (tabElement) observer?.observe(tabElement)
       })
     }
 
-    listElement.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize)
 
     return () => {
       cancelAnimationFrame(frame)
-      listElement.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
       observer?.disconnect()
     }
@@ -433,6 +431,7 @@ export function ArcTabsTailwind({
     if (panelBorderColor) {
       cssVars['--arc-panel-border'] = panelBorderColor
     }
+    cssVars['--arc-notch'] = 'clamp(6px, calc(var(--arc-radius) * 0.58), 12px)'
     cssVars['--arc-motion-duration'] = `${effectiveMotionDuration}ms`
 
     return cssVars
@@ -450,16 +449,19 @@ export function ArcTabsTailwind({
   ])
 
   const rootClassName = joinClassNames(
-    'arc-tabs-tw w-full text-[var(--arc-text)] [--arc-radius:14px] [--arc-gap:10px] [--arc-border-width:1px] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-motion-duration:260ms] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e]',
+    'arc-tabs-tw w-full text-[var(--arc-text)] [--arc-radius:14px] [--arc-gap:10px] [--arc-border-width:1px] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-strip-bg:#edf1ff] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-motion-duration:260ms] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-strip-bg:#26304d] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e]',
     classNames?.root,
     className,
   )
 
   const listClassName = joinClassNames(
-    'relative m-0 flex list-none items-end gap-[var(--arc-gap)] overflow-x-auto overflow-y-clip p-0 pb-[var(--arc-gap)] isolate',
+    'relative m-0 flex min-w-full list-none items-end gap-[var(--arc-gap)] overflow-visible rounded-t-[var(--arc-radius)] border border-b-0 border-[var(--arc-panel-border)] bg-[var(--arc-strip-bg)] px-[calc(var(--arc-gap)*0.6)] pb-[var(--arc-gap)] pt-[calc(var(--arc-gap)*0.6)] isolate',
     classNames?.list,
     tabsClassName,
   )
+
+  const listScrollClassName =
+    'relative -mb-[var(--arc-notch)] overflow-x-auto overflow-y-visible pb-[var(--arc-notch)] [scrollbar-width:thin]'
 
   const panelsClassName = joinClassNames(
     'relative z-[2] mt-0 rounded-b-[var(--arc-radius)] rounded-t-none border border-t-0 border-[var(--arc-panel-border)] bg-[var(--arc-panel-bg)] p-[var(--arc-panel-padding)] shadow-[0_12px_32px_rgba(15,23,42,0.12)]',
@@ -507,90 +509,90 @@ export function ArcTabsTailwind({
 
   return (
     <div className={rootClassName} style={themedStyle} data-slot="root" {...rest}>
-      <ul
-        ref={listRef}
-        className={listClassName}
-        role="tablist"
-        aria-label={ariaLabel}
-        id={`${baseId}-list`}
-        data-slot="list"
-      >
-        {showSlidingIndicator ? (
-          <li
-            aria-hidden="true"
-            role="presentation"
-            className={indicatorClassName}
-            style={indicatorStyle}
-            data-slot="indicator"
-          />
-        ) : null}
+      <div ref={listScrollRef} className={listScrollClassName} data-slot="list-scroll">
+        <ul
+          ref={listRef}
+          className={listClassName}
+          role="tablist"
+          aria-label={ariaLabel}
+          id={`${baseId}-list`}
+          data-slot="list"
+        >
+          {showSlidingIndicator ? (
+            <li
+              aria-hidden="true"
+              role="presentation"
+              className={indicatorClassName}
+              style={indicatorStyle}
+              data-slot="indicator"
+            />
+          ) : null}
 
-        {items.map((item, index) => {
-          const selected = index === selectedIndex
-          const disabled = Boolean(item.disabled)
-          const tabId = `${baseId}-tab-${index}`
-          const panelId = `${baseId}-panel-${index}`
-          const state: ArcTabsRenderState = { index, selected, disabled }
+          {items.map((item, index) => {
+            const selected = index === selectedIndex
+            const disabled = Boolean(item.disabled)
+            const tabId = `${baseId}-tab-${index}`
+            const panelId = `${baseId}-panel-${index}`
+            const state: ArcTabsRenderState = { index, selected, disabled }
 
-          const tabIndexValue = disabled
-            ? -1
-            : focusedIndex === index || (focusedIndex === -1 && selected)
-              ? 0
-              : -1
+            const tabIndexValue = disabled
+              ? -1
+              : focusedIndex === index || (focusedIndex === -1 && selected)
+                ? 0
+                : -1
 
-          const itemClassName = joinClassNames(
-            fit === 'equal' ? 'relative z-[2] min-w-0 flex-1' : 'relative z-[2] shrink-0',
-            classNames?.item,
-          )
+            const itemClassName = joinClassNames(
+              fit === 'equal' ? 'relative z-[2] min-w-0 flex-1' : 'relative z-[2] shrink-0',
+              classNames?.item,
+            )
 
-          const tabClassName = joinClassNames(
-            "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--arc-radius)] border border-[var(--arc-panel-border)] bg-[var(--arc-tab-bg)] text-inherit font-semibold leading-none select-none transition-[background-color,color,transform,border-color,box-shadow] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--arc-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--arc-panel-bg)] disabled:cursor-not-allowed disabled:opacity-45 before:pointer-events-none before:absolute before:bottom-0 before:left-[calc(var(--arc-radius)*-2)] before:h-[calc(var(--arc-radius)*2)] before:w-[calc(var(--arc-radius)*2)] before:translate-y-[var(--arc-gap)] before:bg-[radial-gradient(circle_at_100%_0,_transparent_calc(var(--arc-radius)-1px),_var(--arc-panel-bg)_var(--arc-radius))] before:opacity-0 before:content-[''] before:transition-[opacity,transform] before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] after:pointer-events-none after:absolute after:bottom-0 after:right-[calc(var(--arc-radius)*-2)] after:h-[calc(var(--arc-radius)*2)] after:w-[calc(var(--arc-radius)*2)] after:translate-y-[var(--arc-gap)] after:bg-[radial-gradient(circle_at_0_0,_transparent_calc(var(--arc-radius)-1px),_var(--arc-panel-bg)_var(--arc-radius))] after:opacity-0 after:content-[''] after:transition-[opacity,transform] after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-            sizeClassMap[size],
-            fit === 'equal' && 'w-full justify-center',
-            selected
-              ? joinClassNames(
-                  'z-[3] rounded-b-none border-[var(--arc-panel-bg)] text-[var(--arc-accent)] [box-shadow:0_var(--arc-gap)_0_var(--arc-panel-bg)]',
-                  motionPreset === 'expressive' ? 'bg-transparent' : 'bg-[var(--arc-panel-bg)]',
-                )
-              : 'enabled:hover:bg-[var(--arc-tab-hover-bg)] enabled:hover:translate-y-px enabled:active:translate-y-[2px]',
-            selected && index > 0 && 'before:opacity-100',
-            selected && index < items.length - 1 && 'after:opacity-100',
-            selected ? classNames?.tabSelected : classNames?.tabUnselected,
-            disabled && classNames?.tabDisabled,
-            classNames?.tab,
-          )
+            const tabClassName = joinClassNames(
+              "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--arc-radius)] border border-[var(--arc-panel-border)] bg-[var(--arc-tab-bg)] text-inherit font-semibold leading-none select-none transition-[background-color,color,transform,border-color,box-shadow] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--arc-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--arc-panel-bg)] disabled:cursor-not-allowed disabled:opacity-45 before:pointer-events-none before:absolute before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-border-width)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-[var(--arc-gap)] before:bg-[var(--arc-panel-bg)] before:opacity-0 before:content-[''] before:transition-[opacity,transform] before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] after:pointer-events-none after:absolute after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[calc(var(--arc-notch)+var(--arc-border-width))] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[var(--arc-gap)] after:bg-[radial-gradient(circle_at_left_top,_transparent_var(--arc-notch),_var(--arc-panel-bg)_calc(var(--arc-notch)+1px))_left_top/calc(var(--arc-notch)*2)_calc(var(--arc-notch)*2)_no-repeat,radial-gradient(circle_at_right_top,_transparent_var(--arc-notch),_var(--arc-panel-bg)_calc(var(--arc-notch)+1px))_right_top/calc(var(--arc-notch)*2)_calc(var(--arc-notch)*2)_no-repeat,linear-gradient(var(--arc-panel-bg),_var(--arc-panel-bg))] after:opacity-0 after:content-[''] after:transition-[opacity,transform] after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              sizeClassMap[size],
+              fit === 'equal' && 'w-full justify-center',
+              selected
+                ? joinClassNames(
+                    'z-[3] rounded-b-none border-[var(--arc-panel-bg)] text-[var(--arc-accent)] before:opacity-100 after:opacity-100 [box-shadow:0_var(--arc-gap)_0_var(--arc-panel-bg)]',
+                    motionPreset === 'expressive' ? 'bg-transparent' : 'bg-[var(--arc-panel-bg)]',
+                  )
+                : 'enabled:hover:bg-[var(--arc-tab-hover-bg)] enabled:hover:translate-y-px enabled:active:translate-y-[2px]',
+              selected ? classNames?.tabSelected : classNames?.tabUnselected,
+              disabled && classNames?.tabDisabled,
+              classNames?.tab,
+            )
 
-          return (
-            <li className={itemClassName} key={item.id} role="presentation" data-slot="item">
-              <button
-                id={tabId}
-                ref={(node) => {
-                  tabRefs.current[index] = node
-                }}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                aria-controls={panelId}
-                tabIndex={tabIndexValue}
-                disabled={disabled}
-                className={tabClassName}
-                onFocus={() => {
-                  setFocusedIndex(index)
-                }}
-                onClick={() => {
-                  selectTab(index)
-                }}
-                onKeyDown={(event) => {
-                  handleTabKeyDown(event, index)
-                }}
-                data-slot="tab"
-              >
-                {renderTabLabel ? renderTabLabel(item, state) : renderDefaultLabel(item)}
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+            return (
+              <li className={itemClassName} key={item.id} role="presentation" data-slot="item">
+                <button
+                  id={tabId}
+                  ref={(node) => {
+                    tabRefs.current[index] = node
+                  }}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls={panelId}
+                  tabIndex={tabIndexValue}
+                  disabled={disabled}
+                  className={tabClassName}
+                  onFocus={() => {
+                    setFocusedIndex(index)
+                  }}
+                  onClick={() => {
+                    selectTab(index)
+                  }}
+                  onKeyDown={(event) => {
+                    handleTabKeyDown(event, index)
+                  }}
+                  data-slot="tab"
+                >
+                  {renderTabLabel ? renderTabLabel(item, state) : renderDefaultLabel(item)}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
 
       <div className={panelsClassName} data-slot="panels">
         {items.length === 0 && emptyState}

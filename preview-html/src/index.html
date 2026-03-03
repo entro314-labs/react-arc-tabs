@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arc Tabs Preview</title>
+    <link rel="stylesheet" href="../../src/ArcTabs.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="preview-page">
+      <header class="preview-header">
+        <h1>Arc Tabs Seam Preview</h1>
+        <p>
+          Quick check for the smooth inverted bottom curves where the active tab meets the panel.
+          Try selecting <strong>middle tabs</strong> to see both corners.
+        </p>
+      </header>
+
+      <section class="preview-controls" aria-label="Preview Controls">
+        <label>
+          Radius
+          <input id="radiusRange" type="range" min="8" max="28" step="1" value="18" />
+          <output id="radiusValue" for="radiusRange">18px</output>
+        </label>
+
+        <label>
+          Gap
+          <input id="gapRange" type="range" min="4" max="20" step="1" value="10" />
+          <output id="gapValue" for="gapRange">10px</output>
+        </label>
+      </section>
+
+      <section class="preview-canvas">
+        <div
+          id="arcPreview"
+          class="arc-tabs arc-tabs--size-md arc-tabs--fit-content arc-tabs--motion-subtle"
+          style="
+            --arc-radius: 18px;
+            --arc-gap: 10px;
+            --arc-accent: #5b4ff1;
+            --arc-tab-bg: #dde5ff;
+            --arc-tab-hover-bg: #ced9ff;
+            --arc-panel-bg: #ffffff;
+            --arc-panel-border: #b7c5ff;
+            --arc-panel-padding: 1.2rem;
+          "
+        >
+          <ul class="arc-tabs__list" role="tablist" aria-label="Arc preview tabs" id="arcPreview-list">
+            <li class="arc-tabs__item" role="presentation">
+              <button
+                id="arcPreview-tab-0"
+                class="arc-tabs__tab"
+                type="button"
+                role="tab"
+                aria-controls="arcPreview-panel-0"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                <span class="arc-tabs__text">Overview</span>
+              </button>
+            </li>
+
+            <li class="arc-tabs__item" role="presentation">
+              <button
+                id="arcPreview-tab-1"
+                class="arc-tabs__tab"
+                type="button"
+                role="tab"
+                aria-controls="arcPreview-panel-1"
+                aria-selected="true"
+                tabindex="0"
+              >
+                <span class="arc-tabs__text">Performance</span>
+              </button>
+            </li>
+
+            <li class="arc-tabs__item" role="presentation">
+              <button
+                id="arcPreview-tab-2"
+                class="arc-tabs__tab"
+                type="button"
+                role="tab"
+                aria-controls="arcPreview-panel-2"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                <span class="arc-tabs__text">Integrations</span>
+              </button>
+            </li>
+
+            <li class="arc-tabs__item" role="presentation">
+              <button
+                id="arcPreview-tab-3"
+                class="arc-tabs__tab"
+                type="button"
+                role="tab"
+                aria-controls="arcPreview-panel-3"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                <span class="arc-tabs__text">Settings</span>
+              </button>
+            </li>
+          </ul>
+
+          <div class="arc-tabs__panels">
+            <section
+              id="arcPreview-panel-0"
+              class="arc-tabs__panel"
+              role="tabpanel"
+              aria-labelledby="arcPreview-tab-0"
+              aria-hidden="true"
+              hidden
+            >
+              <h2>Overview</h2>
+              <p>Overview panel content for visual seam verification.</p>
+            </section>
+
+            <section
+              id="arcPreview-panel-1"
+              class="arc-tabs__panel"
+              role="tabpanel"
+              aria-labelledby="arcPreview-tab-1"
+              aria-hidden="false"
+            >
+              <h2>Performance</h2>
+              <p>
+                Active middle tab helps you inspect the left/right inverted bottom curves.
+              </p>
+            </section>
+
+            <section
+              id="arcPreview-panel-2"
+              class="arc-tabs__panel"
+              role="tabpanel"
+              aria-labelledby="arcPreview-tab-2"
+              aria-hidden="true"
+              hidden
+            >
+              <h2>Integrations</h2>
+              <p>Integrations panel content.</p>
+            </section>
+
+            <section
+              id="arcPreview-panel-3"
+              class="arc-tabs__panel"
+              role="tabpanel"
+              aria-labelledby="arcPreview-tab-3"
+              aria-hidden="true"
+              hidden
+            >
+              <h2>Settings</h2>
+              <p>Settings panel content.</p>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./script.js" type="module"></script>
+  </body>
+</html>
