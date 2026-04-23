@@ -431,80 +431,32 @@ export function ArcTabs({
     [activationMode, enabledIndices, focusTabIndex, selectTab],
   )
 
+  // Only sets a CSS var inline when the consumer passed a matching prop.
+  // The stylesheet already defines defaults on `.arc-tabs { ... }`, so forcing
+  // them inline on every render was redundant and blocked external overrides
+  // (inline styles beat stylesheet rules).
   const themedStyle = React.useMemo<React.CSSProperties>(() => {
     const cssVars: CSSVarStyle = { ...style }
 
-    if (radius !== undefined) {
-      cssVars['--arc-radius'] = `${radius}px`
-    }
-
+    if (radius !== undefined) cssVars['--arc-radius'] = `${radius}px`
     const stripPaddingValue = toCssSize(stripPadding)
-    const hasCustomStripPadding = Object.hasOwn(cssVars, '--arc-strip-padding')
-    if (stripPaddingValue !== undefined) {
-      cssVars['--arc-strip-padding'] = stripPaddingValue
-    } else if (!hasCustomStripPadding) {
-      cssVars['--arc-strip-padding'] = '4px'
-    }
-
+    if (stripPaddingValue !== undefined) cssVars['--arc-strip-padding'] = stripPaddingValue
     const tabRadiusValue = toCssSize(tabRadius)
-    const hasCustomTabRadius = Object.hasOwn(cssVars, '--arc-tab-radius')
-    if (tabRadiusValue !== undefined) {
-      cssVars['--arc-tab-radius'] = tabRadiusValue
-    } else if (!hasCustomTabRadius) {
-      cssVars['--arc-tab-radius'] = 'max(0px, calc(var(--arc-radius) - var(--arc-strip-padding)))'
-    }
-
-    const hasCustomPanelCornerRadius = Object.hasOwn(cssVars, '--arc-panel-corner-radius')
-    if (!hasCustomPanelCornerRadius) {
-      cssVars['--arc-panel-corner-radius'] =
-        'max(0px, calc(var(--arc-radius) - (var(--arc-strip-padding) * 2)))'
-    }
-
-    if (gap !== undefined) {
-      cssVars['--arc-gap'] = `${gap}px`
-    }
-
+    if (tabRadiusValue !== undefined) cssVars['--arc-tab-radius'] = tabRadiusValue
+    if (gap !== undefined) cssVars['--arc-gap'] = `${gap}px`
     const seamGapValue = toCssSize(seamGap)
-    const hasCustomSeamGap = Object.hasOwn(cssVars, '--arc-seam-gap')
-    if (seamGapValue !== undefined) {
-      cssVars['--arc-seam-gap'] = seamGapValue
-    } else if (!hasCustomSeamGap) {
-      cssVars['--arc-seam-gap'] = '0px'
-    }
-
+    if (seamGapValue !== undefined) cssVars['--arc-seam-gap'] = seamGapValue
     const notchValue = toCssSize(notch)
-    const hasCustomNotch = Object.hasOwn(cssVars, '--arc-notch')
-    if (notchValue !== undefined) {
-      cssVars['--arc-notch'] = notchValue
-    } else if (!hasCustomNotch) {
-      cssVars['--arc-notch'] = 'var(--arc-tab-radius)'
-    }
-
+    if (notchValue !== undefined) cssVars['--arc-notch'] = notchValue
     const panelPaddingValue = toCssSize(panelPadding)
-    if (panelPaddingValue !== undefined) {
-      cssVars['--arc-panel-padding'] = panelPaddingValue
-    }
-    if (accentColor) {
-      cssVars['--arc-accent'] = accentColor
-    }
-    if (tabBackground) {
-      cssVars['--arc-tab-bg'] = tabBackground
-    }
-    if (tabHoverBackground) {
-      cssVars['--arc-tab-hover-bg'] = tabHoverBackground
-    }
-    if (panelBackground) {
-      cssVars['--arc-panel-bg'] = panelBackground
-    }
-    if (panelBorderColor) {
-      cssVars['--arc-panel-border'] = panelBorderColor
-    }
-    const hasCustomCutoutColor = Object.hasOwn(cssVars, '--arc-cutout-bg')
-    if (cutoutColor) {
-      cssVars['--arc-cutout-bg'] = cutoutColor
-    } else if (!hasCustomCutoutColor) {
-      cssVars['--arc-cutout-bg'] = 'var(--arc-strip-bg)'
-    }
+    if (panelPaddingValue !== undefined) cssVars['--arc-panel-padding'] = panelPaddingValue
+    if (accentColor) cssVars['--arc-accent'] = accentColor
+    if (tabBackground) cssVars['--arc-tab-bg'] = tabBackground
+    if (tabHoverBackground) cssVars['--arc-tab-hover-bg'] = tabHoverBackground
+    if (panelBackground) cssVars['--arc-panel-bg'] = panelBackground
+    if (panelBorderColor) cssVars['--arc-panel-border'] = panelBorderColor
+    if (cutoutColor) cssVars['--arc-cutout-bg'] = cutoutColor
+
     cssVars['--arc-motion-duration'] = `${effectiveMotionDuration}ms`
 
     /* Panel top-corner rounding: when the active tab is NOT at the edge,

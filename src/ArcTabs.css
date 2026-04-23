@@ -95,6 +95,19 @@
   overflow: visible;
   opacity: 0;
   pointer-events: none;
+}
+
+/* Position + size changes always animate once the indicator is ready. */
+.arc-tabs__active-indicator.is-ready {
+  opacity: 1;
+  transition:
+    transform var(--arc-motion-duration) var(--arc-motion-easing),
+    width var(--arc-motion-duration) var(--arc-motion-easing);
+}
+
+/* Opacity only transitions after the user has interacted — prevents a fade-in
+   flash on first mount when the indicator goes from ready:false → ready:true. */
+.arc-tabs--has-interacted .arc-tabs__active-indicator.is-ready {
   transition:
     transform var(--arc-motion-duration) var(--arc-motion-easing),
     width var(--arc-motion-duration) var(--arc-motion-easing),
@@ -106,6 +119,10 @@
   content: '';
   position: absolute;
   pointer-events: none;
+}
+
+.arc-tabs:not(.arc-tabs--motion-expressive) .arc-tabs__active-indicator {
+  display: none;
 }
 
 .arc-tabs__active-indicator::before {
@@ -143,14 +160,6 @@
       right top / var(--arc-notch) var(--arc-notch) no-repeat;
 }
 
-.arc-tabs__active-indicator.is-ready {
-  opacity: 1;
-}
-
-.arc-tabs:not(.arc-tabs--motion-expressive) .arc-tabs__active-indicator {
-  display: none;
-}
-
 .arc-tabs--fit-equal .arc-tabs__item {
   flex: 1 1 0;
   min-width: 0;
@@ -177,10 +186,13 @@
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
+  /* transform intentionally omitted so :active press-down feels instant.
+     border-radius / border-bottom-width are intentionally omitted because
+     they snap together with the selected background change — animating
+     them alongside a color fade caused visible edge jitter. */
   transition:
     background-color var(--arc-motion-duration) var(--arc-motion-easing),
     color var(--arc-motion-duration) var(--arc-motion-easing),
-    transform calc(var(--arc-motion-duration) * 0.65) var(--arc-motion-easing),
     border-color var(--arc-motion-duration) var(--arc-motion-easing),
     box-shadow var(--arc-motion-duration) var(--arc-motion-easing);
 }
@@ -356,6 +368,14 @@
 
 /* Progressive enhancement: clip-path shape() for Bézier-smooth curves */
 @supports (clip-path: shape(from 0 0, line to 0 0)) {
+  /* When clip-path is supported, the selected tab's shape/filter/border all
+     change atomically on selection. Killing color/background fades here keeps
+     them in sync — otherwise you'd see a mid-transition flash where the old
+     tab briefly renders as a panel-colored rectangle. */
+  .arc-tabs__tab {
+    transition: none;
+  }
+
   .arc-tabs__tab[aria-selected='true'] {
     clip-path: shape(
       from calc(0% - var(--arc-notch)) 100%,
