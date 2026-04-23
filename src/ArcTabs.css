@@ -1,15 +1,25 @@
 .arc-tabs {
-  --arc-radius: 14px;
-  --arc-gap: 10px;
+  --arc-radius: 16px;
+  --arc-gap: 2px;
+  --arc-strip-padding: 4px;
+  --arc-seam-gap: 0px;
   --arc-border-width: 1px;
-  --arc-notch: clamp(6px, calc(var(--arc-radius) * 0.58), 12px);
+  --arc-tab-radius: max(0px, calc(var(--arc-radius) - var(--arc-strip-padding)));
+  --arc-panel-corner-radius: max(0px, calc(var(--arc-radius) - (var(--arc-strip-padding) * 2)));
+  --arc-notch: var(--arc-tab-radius);
+  --arc-surface-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
   --arc-motion-duration: 260ms;
   --arc-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Panel corner radii driven by active tab position */
+  --arc-panel-tl-radius: 0px;
+  --arc-panel-tr-radius: 0px;
 
   --arc-accent: #5b4ff1;
   --arc-text: #171a2c;
   --arc-tab-bg: #e7ebff;
   --arc-strip-bg: #edf1ff;
+  --arc-cutout-bg: var(--arc-strip-bg);
   --arc-tab-hover-bg: #dce3ff;
   --arc-panel-bg: #ffffff;
   --arc-panel-border: #cfd6f5;
@@ -27,6 +37,7 @@
     --arc-tab-hover-bg: #374268;
     --arc-panel-bg: #1c243b;
     --arc-panel-border: #46527e;
+    --arc-surface-shadow: 0 1px 2px rgba(2, 8, 20, 0.52);
   }
 }
 
@@ -38,7 +49,7 @@
   gap: var(--arc-gap);
   list-style: none;
   margin: 0;
-  padding: calc(var(--arc-gap) * 0.6) calc(var(--arc-gap) * 0.6) var(--arc-gap);
+  padding: var(--arc-strip-padding) var(--arc-strip-padding) var(--arc-seam-gap);
   border: var(--arc-border-width) solid var(--arc-panel-border);
   border-bottom: none;
   border-top-left-radius: var(--arc-radius);
@@ -50,8 +61,8 @@
 
 .arc-tabs__list-scroll {
   position: relative;
-  margin-bottom: calc(var(--arc-notch) * -1);
-  padding-bottom: var(--arc-notch);
+  margin-bottom: calc((var(--arc-notch) + var(--arc-seam-gap)) * -1);
+  padding-bottom: calc(var(--arc-notch) + var(--arc-seam-gap));
   overflow-x: auto;
   overflow-y: visible;
   scrollbar-width: thin;
@@ -59,8 +70,12 @@
 
 .arc-tabs__item {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   flex: 0 0 auto;
+}
+
+.arc-tabs__item--selected {
+  z-index: 4;
 }
 
 .arc-tabs__active-indicator {
@@ -69,20 +84,63 @@
   top: 0;
   z-index: 1;
   width: var(--arc-indicator-w, 0px);
-  height: calc(100% - var(--arc-gap));
-  border-top-left-radius: var(--arc-radius);
-  border-top-right-radius: var(--arc-radius);
+  height: calc(100% - var(--arc-seam-gap));
+  border-top-left-radius: var(--arc-tab-radius);
+  border-top-right-radius: var(--arc-tab-radius);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   transform: translateX(var(--arc-indicator-x, 0px));
   background: var(--arc-panel-bg);
-  box-shadow: 0 var(--arc-gap) 0 var(--arc-panel-bg);
+  box-shadow: var(--arc-surface-shadow);
+  overflow: visible;
   opacity: 0;
   pointer-events: none;
   transition:
     transform var(--arc-motion-duration) var(--arc-motion-easing),
     width var(--arc-motion-duration) var(--arc-motion-easing),
     opacity calc(var(--arc-motion-duration) * 0.7) ease;
+}
+
+.arc-tabs__active-indicator::before,
+.arc-tabs__active-indicator::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.arc-tabs__active-indicator::before {
+  bottom: 0;
+  left: calc(var(--arc-notch) * -1);
+  width: calc(100% + (var(--arc-notch) * 2));
+  height: var(--arc-seam-gap);
+  transform: translateY(100%);
+  background: linear-gradient(var(--arc-panel-bg), var(--arc-panel-bg)) center top /
+    calc(100% - (var(--arc-notch) * 2)) 100% no-repeat;
+}
+
+.arc-tabs__active-indicator::after {
+  bottom: 0;
+  left: calc(var(--arc-notch) * -1);
+  width: calc(100% + (var(--arc-notch) * 2));
+  height: var(--arc-notch);
+  transform: translateY(calc(100% + var(--arc-seam-gap)));
+  background:
+    radial-gradient(
+        circle at 100% 0,
+        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
+        var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
+      )
+      left top / var(--arc-notch) var(--arc-notch) no-repeat,
+    radial-gradient(
+        circle at 0% 0,
+        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
+        var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
+      )
+      right top / var(--arc-notch) var(--arc-notch) no-repeat;
 }
 
 .arc-tabs__active-indicator.is-ready {
@@ -110,7 +168,7 @@
   justify-content: center;
   gap: 0.5rem;
   border: var(--arc-border-width) solid var(--arc-panel-border);
-  border-radius: var(--arc-radius);
+  border-radius: var(--arc-tab-radius);
   background: var(--arc-tab-bg);
   color: inherit;
   font: inherit;
@@ -147,11 +205,10 @@
 
 .arc-tabs__tab:not([aria-selected='true']):not(:disabled):hover {
   background: var(--arc-tab-hover-bg);
-  transform: translateY(1px);
 }
 
 .arc-tabs__tab:not([aria-selected='true']):not(:disabled):active {
-  transform: translateY(2px);
+  transform: translateY(1px);
 }
 
 .arc-tabs__tab:focus-visible {
@@ -168,10 +225,8 @@
 .arc-tabs__tab::after {
   content: '';
   position: absolute;
-  left: calc(var(--arc-notch) * -1);
   opacity: 0;
   pointer-events: none;
-  transform: translateY(var(--arc-gap));
   transition:
     opacity var(--arc-motion-duration) var(--arc-motion-easing),
     transform var(--arc-motion-duration) var(--arc-motion-easing);
@@ -179,29 +234,37 @@
 
 .arc-tabs__tab::before {
   bottom: 0;
+  left: calc(var(--arc-notch) * -1);
   width: calc(100% + (var(--arc-notch) * 2));
-  height: var(--arc-border-width);
-  background: var(--arc-panel-bg);
+  height: var(--arc-seam-gap);
+  transform: translateY(100%);
+  background: linear-gradient(var(--arc-panel-bg), var(--arc-panel-bg)) center top /
+    calc(100% - (var(--arc-notch) * 2)) 100% no-repeat;
 }
 
 .arc-tabs__tab::after {
   bottom: 0;
+  left: calc(var(--arc-notch) * -1);
   width: calc(100% + (var(--arc-notch) * 2));
-  height: calc(var(--arc-notch) + var(--arc-border-width));
+  height: var(--arc-notch);
+  transform: translateY(calc(100% + var(--arc-seam-gap)));
   background:
     radial-gradient(
-      circle at left top,
-      transparent var(--arc-notch),
-      var(--arc-panel-bg) calc(var(--arc-notch) + 1px)
-    )
-    left top / calc(var(--arc-notch) * 2) calc(var(--arc-notch) * 2) no-repeat,
+        circle at 100% 0,
+        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
+        var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
+      )
+      left top / var(--arc-notch) var(--arc-notch) no-repeat,
     radial-gradient(
-      circle at right top,
-      transparent var(--arc-notch),
-      var(--arc-panel-bg) calc(var(--arc-notch) + 1px)
-    )
-    right top / calc(var(--arc-notch) * 2) calc(var(--arc-notch) * 2) no-repeat,
-    linear-gradient(var(--arc-panel-bg), var(--arc-panel-bg));
+        circle at 0% 0,
+        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
+        var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
+        var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
+      )
+      right top / var(--arc-notch) var(--arc-notch) no-repeat;
 }
 
 .arc-tabs__tab[aria-selected='true']::before,
@@ -211,16 +274,15 @@
 
 .arc-tabs__tab[aria-selected='true'] {
   z-index: 3;
-  color: color-mix(in srgb, var(--arc-accent) 85%, black 15%);
-  border-color: var(--arc-panel-bg);
+  color: var(--arc-text);
+  border-color: var(--arc-panel-border);
+  border-bottom-width: 0;
   background: var(--arc-panel-bg);
+  border-top-left-radius: var(--arc-tab-radius);
+  border-top-right-radius: var(--arc-tab-radius);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  box-shadow: 0 var(--arc-gap) 0 var(--arc-panel-bg);
-}
-
-.arc-tabs--motion-expressive .arc-tabs__tab[aria-selected='true'] {
-  background: transparent;
+  box-shadow: var(--arc-surface-shadow);
 }
 
 .arc-tabs__icon {
@@ -251,13 +313,17 @@
   margin-top: 0;
   border: var(--arc-border-width) solid var(--arc-panel-border);
   border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  border-top-left-radius: var(--arc-panel-tl-radius);
+  border-top-right-radius: var(--arc-panel-tr-radius);
   border-bottom-left-radius: var(--arc-radius);
   border-bottom-right-radius: var(--arc-radius);
+  overflow: hidden;
   background: var(--arc-panel-bg);
   padding: var(--arc-panel-padding);
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--arc-accent) 12%, transparent);
+  box-shadow: var(--arc-surface-shadow);
+  transition:
+    border-top-left-radius var(--arc-motion-duration) var(--arc-motion-easing),
+    border-top-right-radius var(--arc-motion-duration) var(--arc-motion-easing);
 }
 
 .arc-tabs__panel[hidden] {
@@ -265,6 +331,7 @@
 }
 
 .arc-tabs__panel {
+  border-radius: inherit;
   outline: none;
 }
 
@@ -284,5 +351,39 @@
   .arc-tabs__tab::after,
   .arc-tabs__active-indicator {
     transition: none;
+  }
+}
+
+/* Progressive enhancement: clip-path shape() for Bézier-smooth curves */
+@supports (clip-path: shape(from 0 0, line to 0 0)) {
+  .arc-tabs__tab[aria-selected='true'] {
+    clip-path: shape(
+      from calc(0% - var(--arc-notch)) 100%,
+      curve to 0% calc(100% - var(--arc-notch)) with 0% 100%,
+      vline to var(--arc-tab-radius),
+      curve to var(--arc-tab-radius) 0% with 0% 0%,
+      hline to calc(100% - var(--arc-tab-radius)),
+      curve to 100% var(--arc-tab-radius) with 100% 0%,
+      vline to calc(100% - var(--arc-notch)),
+      curve to calc(100% + var(--arc-notch)) 100% with 100% 100%
+    );
+    border-radius: 0;
+    border: none;
+  }
+
+  /* Notch pseudo-elements are redundant when shape() is active */
+  .arc-tabs__tab[aria-selected='true']::before,
+  .arc-tabs__tab[aria-selected='true']::after {
+    display: none;
+  }
+
+  /* Restore visual border + shadow via filter since box-shadow/border are clipped.
+     Four 1px cardinal drop-shadows trace a continuous outline along the clip-path —
+     including the concave notch arcs — then depth shadows layer on top. */
+  .arc-tabs__item--selected {
+    filter: drop-shadow(0 -1px 0 var(--arc-panel-border))
+      drop-shadow(0 1px 0 var(--arc-panel-border)) drop-shadow(-1px 0 0 var(--arc-panel-border))
+      drop-shadow(1px 0 0 var(--arc-panel-border)) drop-shadow(0 1px 3px rgba(15, 23, 42, 0.1))
+      drop-shadow(0 6px 16px rgba(15, 23, 42, 0.08));
   }
 }

@@ -40,13 +40,18 @@ export interface ArcTabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   tabsClassName?: string
   panelClassName?: string
   radius?: number
+  stripPadding?: number | string
+  tabRadius?: number | string
   gap?: number
+  seamGap?: number | string
+  notch?: number | string
   panelPadding?: number | string
   accentColor?: string
   tabBackground?: string
   tabHoverBackground?: string
   panelBackground?: string
   panelBorderColor?: string
+  cutoutColor?: string
   emptyState?: React.ReactNode
   renderTabLabel?: (item: ArcTabItem, state: ArcTabsRenderState) => React.ReactNode
   renderPanel?: (item: ArcTabItem, state: ArcTabsRenderState) => React.ReactNode
@@ -94,13 +99,18 @@ export function ArcTabs({
   tabsClassName,
   panelClassName,
   radius,
+  stripPadding,
+  tabRadius,
   gap,
+  seamGap,
+  notch,
   panelPadding,
   accentColor,
   tabBackground,
   tabHoverBackground,
   panelBackground,
   panelBorderColor,
+  cutoutColor,
   emptyState = null,
   renderTabLabel,
   renderPanel,
@@ -321,7 +331,7 @@ export function ArcTabs({
     }
 
     if (
-      typeof globalThis.window !== 'undefined' &&
+      globalThis.window !== undefined &&
       globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     ) {
       return
@@ -427,8 +437,47 @@ export function ArcTabs({
     if (radius !== undefined) {
       cssVars['--arc-radius'] = `${radius}px`
     }
+
+    const stripPaddingValue = toCssSize(stripPadding)
+    const hasCustomStripPadding = Object.hasOwn(cssVars, '--arc-strip-padding')
+    if (stripPaddingValue !== undefined) {
+      cssVars['--arc-strip-padding'] = stripPaddingValue
+    } else if (!hasCustomStripPadding) {
+      cssVars['--arc-strip-padding'] = '4px'
+    }
+
+    const tabRadiusValue = toCssSize(tabRadius)
+    const hasCustomTabRadius = Object.hasOwn(cssVars, '--arc-tab-radius')
+    if (tabRadiusValue !== undefined) {
+      cssVars['--arc-tab-radius'] = tabRadiusValue
+    } else if (!hasCustomTabRadius) {
+      cssVars['--arc-tab-radius'] = 'max(0px, calc(var(--arc-radius) - var(--arc-strip-padding)))'
+    }
+
+    const hasCustomPanelCornerRadius = Object.hasOwn(cssVars, '--arc-panel-corner-radius')
+    if (!hasCustomPanelCornerRadius) {
+      cssVars['--arc-panel-corner-radius'] =
+        'max(0px, calc(var(--arc-radius) - (var(--arc-strip-padding) * 2)))'
+    }
+
     if (gap !== undefined) {
       cssVars['--arc-gap'] = `${gap}px`
+    }
+
+    const seamGapValue = toCssSize(seamGap)
+    const hasCustomSeamGap = Object.hasOwn(cssVars, '--arc-seam-gap')
+    if (seamGapValue !== undefined) {
+      cssVars['--arc-seam-gap'] = seamGapValue
+    } else if (!hasCustomSeamGap) {
+      cssVars['--arc-seam-gap'] = '0px'
+    }
+
+    const notchValue = toCssSize(notch)
+    const hasCustomNotch = Object.hasOwn(cssVars, '--arc-notch')
+    if (notchValue !== undefined) {
+      cssVars['--arc-notch'] = notchValue
+    } else if (!hasCustomNotch) {
+      cssVars['--arc-notch'] = 'var(--arc-tab-radius)'
     }
 
     const panelPaddingValue = toCssSize(panelPadding)
@@ -450,21 +499,40 @@ export function ArcTabs({
     if (panelBorderColor) {
       cssVars['--arc-panel-border'] = panelBorderColor
     }
-    cssVars['--arc-notch'] = 'clamp(6px, calc(var(--arc-radius) * 0.58), 12px)'
+    const hasCustomCutoutColor = Object.hasOwn(cssVars, '--arc-cutout-bg')
+    if (cutoutColor) {
+      cssVars['--arc-cutout-bg'] = cutoutColor
+    } else if (!hasCustomCutoutColor) {
+      cssVars['--arc-cutout-bg'] = 'var(--arc-strip-bg)'
+    }
     cssVars['--arc-motion-duration'] = `${effectiveMotionDuration}ms`
+
+    /* Panel top-corner rounding: when the active tab is NOT at the edge,
+       the panel corner on that side gets a radius for a smoother visual connection */
+    const isFirst = selectedIndex === 0
+    const isLast = selectedIndex === items.length - 1
+    cssVars['--arc-panel-tl-radius'] = isFirst ? '0px' : 'var(--arc-panel-corner-radius)'
+    cssVars['--arc-panel-tr-radius'] = isLast ? '0px' : 'var(--arc-panel-corner-radius)'
 
     return cssVars
   }, [
     style,
     radius,
+    stripPadding,
+    tabRadius,
     gap,
+    seamGap,
+    notch,
     panelPadding,
     accentColor,
     tabBackground,
     tabHoverBackground,
     panelBackground,
     panelBorderColor,
+    cutoutColor,
     effectiveMotionDuration,
+    selectedIndex,
+    items.length,
   ])
 
   const rootClassName = joinClassNames(
@@ -510,7 +578,10 @@ export function ArcTabs({
             <li
               aria-hidden="true"
               role="presentation"
-              className={joinClassNames('arc-tabs__active-indicator', indicator.ready && 'is-ready')}
+              className={joinClassNames(
+                'arc-tabs__active-indicator',
+                indicator.ready && 'is-ready',
+              )}
               style={indicatorStyle}
             />
           ) : null}
@@ -529,7 +600,11 @@ export function ArcTabs({
                 : -1
 
             return (
-              <li className="arc-tabs__item" key={item.id} role="presentation">
+              <li
+                className={joinClassNames('arc-tabs__item', selected && 'arc-tabs__item--selected')}
+                key={item.id}
+                role="presentation"
+              >
                 <button
                   id={tabId}
                   ref={(node) => {

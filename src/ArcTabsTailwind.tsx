@@ -74,13 +74,18 @@ export function ArcTabsTailwind({
   tabsClassName,
   panelClassName,
   radius,
+  stripPadding,
+  tabRadius,
   gap,
+  seamGap,
+  notch,
   panelPadding,
   accentColor,
   tabBackground,
   tabHoverBackground,
   panelBackground,
   panelBorderColor,
+  cutoutColor,
   emptyState = null,
   renderTabLabel,
   renderPanel,
@@ -302,7 +307,7 @@ export function ArcTabsTailwind({
     }
 
     if (
-      typeof globalThis.window !== 'undefined' &&
+      globalThis.window !== undefined &&
       globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     ) {
       return
@@ -408,8 +413,47 @@ export function ArcTabsTailwind({
     if (radius !== undefined) {
       cssVars['--arc-radius'] = `${radius}px`
     }
+
+    const stripPaddingValue = toCssSize(stripPadding)
+    const hasCustomStripPadding = Object.hasOwn(cssVars, '--arc-strip-padding')
+    if (stripPaddingValue !== undefined) {
+      cssVars['--arc-strip-padding'] = stripPaddingValue
+    } else if (!hasCustomStripPadding) {
+      cssVars['--arc-strip-padding'] = '4px'
+    }
+
+    const tabRadiusValue = toCssSize(tabRadius)
+    const hasCustomTabRadius = Object.hasOwn(cssVars, '--arc-tab-radius')
+    if (tabRadiusValue !== undefined) {
+      cssVars['--arc-tab-radius'] = tabRadiusValue
+    } else if (!hasCustomTabRadius) {
+      cssVars['--arc-tab-radius'] = 'max(0px, calc(var(--arc-radius) - var(--arc-strip-padding)))'
+    }
+
+    const hasCustomPanelCornerRadius = Object.hasOwn(cssVars, '--arc-panel-corner-radius')
+    if (!hasCustomPanelCornerRadius) {
+      cssVars['--arc-panel-corner-radius'] =
+        'max(0px, calc(var(--arc-radius) - (var(--arc-strip-padding) * 2)))'
+    }
+
     if (gap !== undefined) {
       cssVars['--arc-gap'] = `${gap}px`
+    }
+
+    const seamGapValue = toCssSize(seamGap)
+    const hasCustomSeamGap = Object.hasOwn(cssVars, '--arc-seam-gap')
+    if (seamGapValue !== undefined) {
+      cssVars['--arc-seam-gap'] = seamGapValue
+    } else if (!hasCustomSeamGap) {
+      cssVars['--arc-seam-gap'] = '0px'
+    }
+
+    const notchValue = toCssSize(notch)
+    const hasCustomNotch = Object.hasOwn(cssVars, '--arc-notch')
+    if (notchValue !== undefined) {
+      cssVars['--arc-notch'] = notchValue
+    } else if (!hasCustomNotch) {
+      cssVars['--arc-notch'] = 'var(--arc-tab-radius)'
     }
 
     const panelPaddingValue = toCssSize(panelPadding)
@@ -431,40 +475,57 @@ export function ArcTabsTailwind({
     if (panelBorderColor) {
       cssVars['--arc-panel-border'] = panelBorderColor
     }
-    cssVars['--arc-notch'] = 'clamp(6px, calc(var(--arc-radius) * 0.58), 12px)'
+    const hasCustomCutoutColor = Object.hasOwn(cssVars, '--arc-cutout-bg')
+    if (cutoutColor) {
+      cssVars['--arc-cutout-bg'] = cutoutColor
+    } else if (!hasCustomCutoutColor) {
+      cssVars['--arc-cutout-bg'] = 'var(--arc-strip-bg)'
+    }
     cssVars['--arc-motion-duration'] = `${effectiveMotionDuration}ms`
+
+    const isFirst = selectedIndex === 0
+    const isLast = selectedIndex === items.length - 1
+    cssVars['--arc-panel-tl-radius'] = isFirst ? '0px' : 'var(--arc-panel-corner-radius)'
+    cssVars['--arc-panel-tr-radius'] = isLast ? '0px' : 'var(--arc-panel-corner-radius)'
 
     return cssVars
   }, [
     style,
     radius,
+    stripPadding,
+    tabRadius,
     gap,
+    seamGap,
+    notch,
     panelPadding,
     accentColor,
     tabBackground,
     tabHoverBackground,
     panelBackground,
     panelBorderColor,
+    cutoutColor,
     effectiveMotionDuration,
+    selectedIndex,
+    items.length,
   ])
 
   const rootClassName = joinClassNames(
-    'arc-tabs-tw w-full text-[var(--arc-text)] [--arc-radius:14px] [--arc-gap:10px] [--arc-border-width:1px] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-strip-bg:#edf1ff] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-motion-duration:260ms] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-strip-bg:#26304d] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e]',
+    'arc-tabs-tw w-full text-[var(--arc-text)] [--arc-radius:16px] [--arc-gap:2px] [--arc-strip-padding:4px] [--arc-seam-gap:0px] [--arc-border-width:1px] [--arc-tab-radius:max(0px,calc(var(--arc-radius)-var(--arc-strip-padding)))] [--arc-panel-corner-radius:max(0px,calc(var(--arc-radius)-(var(--arc-strip-padding)*2)))] [--arc-notch:var(--arc-tab-radius)] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-strip-bg:#edf1ff] [--arc-cutout-bg:var(--arc-strip-bg)] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-motion-duration:260ms] [--arc-surface-shadow:0_1px_2px_rgba(15,23,42,0.08)] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-strip-bg:#26304d] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e] dark:[--arc-surface-shadow:0_1px_2px_rgba(2,8,20,0.52)]',
     classNames?.root,
     className,
   )
 
   const listClassName = joinClassNames(
-    'relative m-0 flex min-w-full list-none items-end gap-[var(--arc-gap)] overflow-visible rounded-t-[var(--arc-radius)] border border-b-0 border-[var(--arc-panel-border)] bg-[var(--arc-strip-bg)] px-[calc(var(--arc-gap)*0.6)] pb-[var(--arc-gap)] pt-[calc(var(--arc-gap)*0.6)] isolate',
+    'relative m-0 flex min-w-full list-none items-end gap-[var(--arc-gap)] overflow-visible rounded-t-[var(--arc-radius)] border border-b-0 border-[var(--arc-panel-border)] bg-[var(--arc-strip-bg)] px-[var(--arc-strip-padding)] pb-[var(--arc-seam-gap)] pt-[var(--arc-strip-padding)] isolate',
     classNames?.list,
     tabsClassName,
   )
 
   const listScrollClassName =
-    'relative -mb-[var(--arc-notch)] overflow-x-auto overflow-y-visible pb-[var(--arc-notch)] [scrollbar-width:thin]'
+    'relative -mb-[calc(var(--arc-notch)+var(--arc-seam-gap))] overflow-x-auto overflow-y-visible pb-[calc(var(--arc-notch)+var(--arc-seam-gap))] [scrollbar-width:thin]'
 
   const panelsClassName = joinClassNames(
-    'relative z-[2] mt-0 rounded-b-[var(--arc-radius)] rounded-t-none border border-t-0 border-[var(--arc-panel-border)] bg-[var(--arc-panel-bg)] p-[var(--arc-panel-padding)] shadow-[0_12px_32px_rgba(15,23,42,0.12)]',
+    'relative z-[2] mt-0 overflow-hidden rounded-bl-[var(--arc-radius)] rounded-br-[var(--arc-radius)] rounded-tl-[var(--arc-panel-tl-radius)] rounded-tr-[var(--arc-panel-tr-radius)] border border-t-0 border-[var(--arc-panel-border)] bg-[var(--arc-panel-bg)] p-[var(--arc-panel-padding)] shadow-[var(--arc-surface-shadow)] transition-[border-radius] duration-[var(--arc-motion-duration)] ease-[cubic-bezier(0.22,1,0.36,1)]',
     classNames?.panels,
     panelClassName,
   )
@@ -502,7 +563,7 @@ export function ArcTabsTailwind({
   )
 
   const indicatorClassName = joinClassNames(
-    'pointer-events-none absolute left-0 top-0 z-[1] h-[calc(100%-var(--arc-gap))] w-[var(--arc-indicator-w)] translate-x-[var(--arc-indicator-x)] rounded-t-[var(--arc-radius)] rounded-b-none bg-[var(--arc-panel-bg)] opacity-0 [box-shadow:0_var(--arc-gap)_0_var(--arc-panel-bg)] transition-[transform,width,opacity] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]',
+    "pointer-events-none absolute left-0 top-0 z-[1] h-[calc(100%-var(--arc-seam-gap))] w-[var(--arc-indicator-w)] translate-x-[var(--arc-indicator-x)] overflow-visible rounded-t-[var(--arc-tab-radius)] rounded-b-none bg-[var(--arc-panel-bg)] shadow-[var(--arc-surface-shadow)] opacity-0 transition-[transform,width,opacity] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] before:pointer-events-none before:absolute before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-seam-gap)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-full before:bg-[linear-gradient(var(--arc-panel-bg),_var(--arc-panel-bg))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:content-[''] after:pointer-events-none after:absolute after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[var(--arc-notch)] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(100%+var(--arc-seam-gap))] after:bg-[radial-gradient(circle_at_100%_0,var(--arc-cutout-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_var(--arc-notch)_no-repeat,radial-gradient(circle_at_0_0,var(--arc-cutout-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_var(--arc-notch)_no-repeat] after:content-['']",
     indicator.ready && 'opacity-100',
     classNames?.indicator,
   )
@@ -542,20 +603,26 @@ export function ArcTabsTailwind({
                 : -1
 
             const itemClassName = joinClassNames(
-              fit === 'equal' ? 'relative z-[2] min-w-0 flex-1' : 'relative z-[2] shrink-0',
+              fit === 'equal'
+                ? selected
+                  ? 'relative z-[4] min-w-0 flex-1'
+                  : 'relative z-[2] min-w-0 flex-1'
+                : selected
+                  ? 'relative z-[4] shrink-0'
+                  : 'relative z-[2] shrink-0',
               classNames?.item,
             )
 
             const tabClassName = joinClassNames(
-              "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--arc-radius)] border border-[var(--arc-panel-border)] bg-[var(--arc-tab-bg)] text-inherit font-semibold leading-none select-none transition-[background-color,color,transform,border-color,box-shadow] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--arc-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--arc-panel-bg)] disabled:cursor-not-allowed disabled:opacity-45 before:pointer-events-none before:absolute before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-border-width)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-[var(--arc-gap)] before:bg-[var(--arc-panel-bg)] before:opacity-0 before:content-[''] before:transition-[opacity,transform] before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] after:pointer-events-none after:absolute after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[calc(var(--arc-notch)+var(--arc-border-width))] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[var(--arc-gap)] after:bg-[radial-gradient(circle_at_left_top,_transparent_var(--arc-notch),_var(--arc-panel-bg)_calc(var(--arc-notch)+1px))_left_top/calc(var(--arc-notch)*2)_calc(var(--arc-notch)*2)_no-repeat,radial-gradient(circle_at_right_top,_transparent_var(--arc-notch),_var(--arc-panel-bg)_calc(var(--arc-notch)+1px))_right_top/calc(var(--arc-notch)*2)_calc(var(--arc-notch)*2)_no-repeat,linear-gradient(var(--arc-panel-bg),_var(--arc-panel-bg))] after:opacity-0 after:content-[''] after:transition-[opacity,transform] after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--arc-tab-radius)] border border-[var(--arc-panel-border)] bg-[var(--arc-tab-bg)] text-inherit font-semibold leading-none select-none transition-[background-color,color,transform,border-color,box-shadow] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--arc-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--arc-panel-bg)] disabled:cursor-not-allowed disabled:opacity-45 before:pointer-events-none before:absolute before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-seam-gap)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-full before:bg-[linear-gradient(var(--arc-panel-bg),_var(--arc-panel-bg))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:opacity-0 before:content-[''] before:transition-[opacity,transform] before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] after:pointer-events-none after:absolute after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[var(--arc-notch)] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(100%+var(--arc-seam-gap))] after:bg-[radial-gradient(circle_at_100%_0,var(--arc-cutout-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_var(--arc-notch)_no-repeat,radial-gradient(circle_at_0_0,var(--arc-cutout-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_var(--arc-notch)_no-repeat] after:opacity-0 after:content-[''] after:transition-[opacity,transform] after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
               sizeClassMap[size],
               fit === 'equal' && 'w-full justify-center',
               selected
                 ? joinClassNames(
-                    'z-[3] rounded-b-none border-[var(--arc-panel-bg)] text-[var(--arc-accent)] before:opacity-100 after:opacity-100 [box-shadow:0_var(--arc-gap)_0_var(--arc-panel-bg)]',
-                    motionPreset === 'expressive' ? 'bg-transparent' : 'bg-[var(--arc-panel-bg)]',
+                    'z-[3] rounded-b-none border-b-0 border-[var(--arc-panel-border)] text-[var(--arc-text)] before:opacity-100 after:opacity-100 shadow-[var(--arc-surface-shadow)]',
+                    'bg-[var(--arc-panel-bg)]',
                   )
-                : 'enabled:hover:bg-[var(--arc-tab-hover-bg)] enabled:hover:translate-y-px enabled:active:translate-y-[2px]',
+                : 'enabled:hover:bg-[var(--arc-tab-hover-bg)] enabled:active:translate-y-px',
               selected ? classNames?.tabSelected : classNames?.tabUnselected,
               disabled && classNames?.tabDisabled,
               classNames?.tab,
@@ -616,7 +683,7 @@ export function ArcTabsTailwind({
                     }
                   }}
                   id={panelId}
-                  className={joinClassNames('outline-none', classNames?.panel)}
+                  className={joinClassNames('outline-none rounded-[inherit]', classNames?.panel)}
                   role="tabpanel"
                   aria-labelledby={tabId}
                   aria-hidden={!selected}
@@ -635,7 +702,7 @@ export function ArcTabsTailwind({
               activePanelRef.current = node
             }}
             id={`${baseId}-panel-${selectedIndex}`}
-            className={joinClassNames('outline-none', classNames?.panel)}
+            className={joinClassNames('outline-none rounded-[inherit]', classNames?.panel)}
             role="tabpanel"
             aria-labelledby={`${baseId}-tab-${selectedIndex}`}
             aria-hidden={false}

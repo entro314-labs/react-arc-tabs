@@ -7,6 +7,7 @@ Reusable arc-style tabs component for React and Next.js, including a Tailwind CS
 - Accessible tabs: ARIA roles + keyboard interactions
 - Controlled and uncontrolled state models
 - CSS-based and Tailwind v4+ variants
+- Concentric radius geometry (`inner radius = parent radius - inset`) for strip/tab/panel alignment
 - Switch animations (including sliding active backdrop and animated panel entry)
 - TypeScript-first API
 
@@ -41,6 +42,10 @@ export function Example() {
       defaultValue="overview"
       motionPreset="expressive"
       motionDuration={320}
+      radius={16}
+      stripPadding={4}
+      notch={6}
+      seamGap={0}
       ariaLabel="Project sections"
     />
   );
@@ -127,8 +132,29 @@ export default function Page() {
 - `fit?: "content" | "equal"`
 - `motionPreset?: "none" | "subtle" | "expressive"`
 - `motionDuration?: number`
+- `radius?: number` (outer shell radius)
+- `stripPadding?: number | string` (inset from shell to tabs; drives concentric tab/panel geometry)
+- `tabRadius?: number | string` (optional explicit tab radius override)
+- `seamGap?: number | string` (vertical distance between active tab and panel; default `0` for a fused shape)
+- `notch?: number | string` (controls inverted corner curve size)
+- `cutoutColor?: string` (color of the concave seam cutouts; defaults to strip background)
 - `keepMounted?: boolean`
 - `ariaLabel?: string`
+
+By default, the component derives radii from concentric rules:
+
+- `tabRadius = radius - stripPadding`
+- `panelCornerRadius = radius - (2 × stripPadding)`
+- `defaultNotch = clamp(6px, tabRadius × 0.5, 12px)`
+
+Reference profile used for the attached design:
+
+- `radius = 16`
+- `stripPadding = 4`
+- `tabRadius = 12`
+- `panelCornerRadius = 8`
+- `notch = 6`
+- `seamGap = 0`
 
 Additional styling/theming props are available for both variants.
 

@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
 
   "plugins": [
     "oxc",
@@ -71,7 +71,7 @@
     "no-empty": ["error", { "allowEmptyCatch": true }],
     "no-else-return": "error",
     "no-array-constructor": "error",
-    // CLIs log output intentionally — console is the interface
+    // CLIs log output intentionally - console is the interface
     "no-console": "off",
     "no-void": ["error", { "allowAsStatement": true }],
     "no-useless-concat": "error",
@@ -125,7 +125,7 @@
     "typescript/no-extra-non-null-assertion": "error",
     "typescript/no-unnecessary-type-constraint": "error",
 
-    // type-aware — enable with: oxlint --type-aware -c cli.oxlintrc.json
+    // type-aware - enable with: oxlint --type-aware -c cli.oxlintrc.json
     "typescript/await-thenable": "error",
     "typescript/no-misused-promises": ["error", { "checksVoidReturn": false }],
     "typescript/no-unnecessary-type-arguments": "error",
@@ -158,7 +158,6 @@
     "unicorn/consistent-date-clone": "error",
     "unicorn/consistent-empty-array-spread": "error",
     "unicorn/consistent-existence-index-check": "error",
-    "unicorn/consistent-indexed-object-style": ["error", "record"],
     "unicorn/error-message": "error",
     "unicorn/escape-case": "error",
     "unicorn/no-anonymous-default-export": "error",
@@ -193,7 +192,7 @@
     "unicorn/prefer-type-error": "error",
     "unicorn/require-number-to-fixed-digits-argument": "error",
 
-    // DOM rules — irrelevant for CLI, disabled explicitly
+    // DOM rules - irrelevant for CLI, disabled explicitly
     "unicorn/prefer-dom-node-dataset": "off",
     "unicorn/prefer-dom-node-text-content": "off",
     "unicorn/prefer-keyboard-event-key": "off",
@@ -203,7 +202,7 @@
 
   "overrides": [
     {
-      // Entry points / bin files — process.exit and top-level async are common
+      // Entry points / bin files - process.exit and top-level async are common
       "files": ["**/bin/**/*.{js,ts}", "**/cli.{js,ts}", "**/index.{js,ts}", "**/main.{js,ts}"],
       "rules": {
         "unicorn/no-process-exit": "off",
@@ -241,7 +240,7 @@
       }
     },
     {
-      // Scripts — loose everything, these are automation glue
+      // Scripts - loose everything, these are automation glue
       "files": ["**/scripts/**/*.{js,ts}"],
       "rules": {
         "typescript/no-explicit-any": "off",
