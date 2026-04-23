@@ -366,44 +366,21 @@
   }
 }
 
-/* Progressive enhancement: clip-path shape() for Bézier-smooth curves */
-@supports (clip-path: shape(from 0 0, line to 0 0)) {
-  /* When clip-path is supported, the selected tab's shape/filter/border all
-     change atomically on selection. Killing color/background fades here keeps
-     them in sync — otherwise you'd see a mid-transition flash where the old
-     tab briefly renders as a panel-colored rectangle. */
-  .arc-tabs__tab {
-    transition: none;
-  }
+/* ============================================================================
+   NOTE: A previous "progressive enhancement" here applied a
+   `clip-path: shape()` to the active tab with coordinates extending outside
+   the element's reference box, and hid the ::before/::after pseudos inside
+   `@supports (clip-path: shape())`.
 
-  .arc-tabs__tab[aria-selected='true'] {
-    clip-path: shape(
-      from calc(0% - var(--arc-notch)) 100%,
-      curve to 0% calc(100% - var(--arc-notch)) with 0% 100%,
-      vline to var(--arc-tab-radius),
-      curve to var(--arc-tab-radius) 0% with 0% 0%,
-      hline to calc(100% - var(--arc-tab-radius)),
-      curve to 100% var(--arc-tab-radius) with 100% 0%,
-      vline to calc(100% - var(--arc-notch)),
-      curve to calc(100% + var(--arc-notch)) 100% with 100% 100%
-    );
-    border-radius: 0;
-    border: none;
-  }
+   That approach is broken in every browser that actually supports shape():
+   per CSS spec, clip-path regions outside the element's reference box have
+   no painted content to reveal, so the outward-extending notch curves are
+   INVISIBLE. Combined with the pseudo fallback being hidden by the same
+   block, the active tab renders as a plain rectangle with no notches.
 
-  /* Notch pseudo-elements are redundant when shape() is active */
-  .arc-tabs__tab[aria-selected='true']::before,
-  .arc-tabs__tab[aria-selected='true']::after {
-    display: none;
-  }
-
-  /* Restore visual border + shadow via filter since box-shadow/border are clipped.
-     Four 1px cardinal drop-shadows trace a continuous outline along the clip-path —
-     including the concave notch arcs — then depth shadows layer on top. */
-  .arc-tabs__item--selected {
-    filter: drop-shadow(0 -1px 0 var(--arc-panel-border))
-      drop-shadow(0 1px 0 var(--arc-panel-border)) drop-shadow(-1px 0 0 var(--arc-panel-border))
-      drop-shadow(1px 0 0 var(--arc-panel-border)) drop-shadow(0 1px 3px rgba(15, 23, 42, 0.1))
-      drop-shadow(0 6px 16px rgba(15, 23, 42, 0.08));
-  }
-}
+   The pseudo-element path above (::before/::after with their own
+   absolutely-positioned boxes that extend ±notch beyond the tab) is the
+   mechanism that actually works — and it works the same in every modern
+   browser. It's kept unconditionally; the broken @supports block has been
+   removed.
+   ============================================================================ */
