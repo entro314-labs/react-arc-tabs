@@ -7,6 +7,11 @@
   --arc-tab-radius: max(0px, calc(var(--arc-radius) - var(--arc-strip-padding)));
   --arc-panel-corner-radius: max(0px, calc(var(--arc-radius) - (var(--arc-strip-padding) * 2)));
   --arc-notch: var(--arc-tab-radius);
+  /* Vertical offset of the notch pseudo below the tab. Library default pushes
+     the pseudo fully below the tab (100%). Consumers embedding tabs in a
+     flush layout (no separate panel) can lower this to pull the notch up
+     into the tab's bottom area. Accepts any <length-percentage>. */
+  --arc-notch-offset-y: 100%;
   --arc-surface-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
   --arc-motion-duration: 260ms;
   --arc-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
@@ -19,7 +24,10 @@
   --arc-text: #171a2c;
   --arc-tab-bg: #e7ebff;
   --arc-strip-bg: #edf1ff;
-  --arc-cutout-bg: var(--arc-strip-bg);
+  /* Color drawn INSIDE the notch gradient circle — the visible quarter-arc
+     fill that reads as the curved tab→panel transition. Defaults to the
+     strip background so the flare blends horizontally with the tab bar. */
+  --arc-notch-bg: var(--arc-strip-bg);
   --arc-tab-hover-bg: #dce3ff;
   --arc-panel-bg: #ffffff;
   --arc-panel-border: #cfd6f5;
@@ -27,6 +35,10 @@
 
   width: 100%;
   color: var(--arc-text);
+  /* Establish a stacking context so the notch ::after pseudos (which paint
+     below the tab's bottom edge) stay layered within this component and
+     don't get covered by consumer-side siblings at the same stacking level. */
+  isolation: isolate;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -140,19 +152,22 @@
   left: calc(var(--arc-notch) * -1);
   width: calc(100% + (var(--arc-notch) * 2));
   height: var(--arc-notch);
-  transform: translateY(calc(100% + var(--arc-seam-gap)));
+  transform: translateY(calc(var(--arc-notch-offset-y) + var(--arc-seam-gap)));
+  /* Gradient circle centers sit at the OUTER corners of the gutter — the
+     visible quarter-arc attaches at the outer-bottom and curves inward to
+     meet the tab's side edge. This is the Arc-browser flare shape. */
   background:
     radial-gradient(
-        circle at 100% 0,
-        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        circle at 0% 0,
+        var(--arc-notch-bg) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
         var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
       )
       left top / var(--arc-notch) var(--arc-notch) no-repeat,
     radial-gradient(
-        circle at 0% 0,
-        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        circle at 100% 0,
+        var(--arc-notch-bg) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
         var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
@@ -259,19 +274,22 @@
   left: calc(var(--arc-notch) * -1);
   width: calc(100% + (var(--arc-notch) * 2));
   height: var(--arc-notch);
-  transform: translateY(calc(100% + var(--arc-seam-gap)));
+  transform: translateY(calc(var(--arc-notch-offset-y) + var(--arc-seam-gap)));
+  /* Gradient circle centers sit at the OUTER corners of the gutter — the
+     visible quarter-arc attaches at the outer-bottom and curves inward to
+     meet the tab's side edge. This is the Arc-browser flare shape. */
   background:
     radial-gradient(
-        circle at 100% 0,
-        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        circle at 0% 0,
+        var(--arc-notch-bg) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
         var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
       )
       left top / var(--arc-notch) var(--arc-notch) no-repeat,
     radial-gradient(
-        circle at 0% 0,
-        var(--arc-cutout-bg) calc(var(--arc-notch) - var(--arc-border-width)),
+        circle at 100% 0,
+        var(--arc-notch-bg) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
         var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
