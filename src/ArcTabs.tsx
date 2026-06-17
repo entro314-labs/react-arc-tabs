@@ -57,6 +57,17 @@ export interface ArcTabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   renderPanel?: (item: ArcTabItem, state: ArcTabsRenderState) => React.ReactNode
 }
 
+/**
+ * `linear()` easing that approximates a spring (stiffness 400, damping 35,
+ * mass 1) — the same physics the source component animated the sliding card
+ * with. It decelerates snappily and settles with a faint (~0.3%) overshoot
+ * rather than a plain ease-out. Valid in both CSS `transition-timing-function`
+ * and the Web Animations API, so the expressive preset can stay dependency-free.
+ * Keep this literal in sync with `--arc-motion-spring` in ArcTabs.css.
+ */
+export const ARC_SPRING_EASING =
+  'linear(0, 0.078 5%, 0.241 10%, 0.419 15%, 0.58 20%, 0.712 25%, 0.811 30%, 0.883 35%, 0.931 40%, 0.982 50%, 1 60%, 1.003 70%, 1.002 85%, 1)'
+
 const joinClassNames = (...parts: Array<string | undefined | false | null>) =>
   parts.filter(Boolean).join(' ')
 
@@ -181,9 +192,6 @@ export function ArcTabs({
   const previousSelectedIndexRef = React.useRef(selectedIndex)
 
   const [hasInteracted, setHasInteracted] = React.useState(false)
-  const [panelDirection, setPanelDirection] = React.useState<'forward' | 'backward' | 'none'>(
-    'none',
-  )
   const [indicator, setIndicator] = React.useState({
     x: 0,
     width: 0,
@@ -208,10 +216,6 @@ export function ArcTabs({
 
     if (previous !== selectedIndex) {
       setHasInteracted(true)
-
-      if (selectedIndex >= 0 && previous >= 0) {
-        setPanelDirection(selectedIndex > previous ? 'forward' : 'backward')
-      }
     }
 
     previousSelectedIndexRef.current = selectedIndex
@@ -233,9 +237,6 @@ export function ArcTabs({
       }
 
       setHasInteracted(true)
-      if (selectedIndex >= 0) {
-        setPanelDirection(index > selectedIndex ? 'forward' : 'backward')
-      }
 
       if (!isControlled) {
         setUncontrolledValue(item.id)
@@ -337,42 +338,38 @@ export function ArcTabs({
       return
     }
 
-    const offsetX =
+    // Expressive matches the source component: the new panel rises from below
+    // and fades in, settling with the spring easing (no horizontal/scale/blur).
+    // Subtle keeps the understated lift + blur on a plain ease-out.
+    const keyframes: Keyframe[] =
       motionPreset === 'expressive'
-        ? panelDirection === 'forward'
-          ? 20
-          : panelDirection === 'backward'
-            ? -20
-            : 0
-        : 0
+        ? [
+            { opacity: 0, transform: 'translate3d(0, 20px, 0)' },
+            { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+          ]
+        : [
+            {
+              opacity: 0,
+              transform: 'translate3d(0, 6px, 0) scale(0.995)',
+              filter: 'blur(1px)',
+            },
+            {
+              opacity: 1,
+              transform: 'translate3d(0, 0, 0) scale(1)',
+              filter: 'blur(0px)',
+            },
+          ]
 
-    const offsetY = motionPreset === 'expressive' ? 10 : 6
-    const startScale = motionPreset === 'expressive' ? 0.985 : 0.995
-
-    const animation = panelElement.animate(
-      [
-        {
-          opacity: 0,
-          transform: `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${startScale})`,
-          filter: 'blur(1px)',
-        },
-        {
-          opacity: 1,
-          transform: 'translate3d(0, 0, 0) scale(1)',
-          filter: 'blur(0px)',
-        },
-      ],
-      {
-        duration: effectiveMotionDuration,
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both',
-      },
-    )
+    const animation = panelElement.animate(keyframes, {
+      duration: effectiveMotionDuration,
+      easing: motionPreset === 'expressive' ? ARC_SPRING_EASING : 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fill: 'both',
+    })
 
     return () => {
       animation.cancel()
     }
-  }, [selectedIndex, hasInteracted, motionPreset, panelDirection, effectiveMotionDuration])
+  }, [selectedIndex, hasInteracted, motionPreset, effectiveMotionDuration])
 
   const handleTabKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -493,7 +490,6 @@ export function ArcTabs({
     `arc-tabs--fit-${fit}`,
     `arc-tabs--motion-${motionPreset}`,
     hasInteracted && 'arc-tabs--has-interacted',
-    panelDirection !== 'none' && `arc-tabs--direction-${panelDirection}`,
     className,
   )
 

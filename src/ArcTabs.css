@@ -15,6 +15,28 @@
   --arc-surface-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
   --arc-motion-duration: 260ms;
   --arc-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
+  /* `linear()` approximation of a spring (stiffness 400, damping 35, mass 1) —
+     the physics the expressive preset's sliding card + panel enter decelerate
+     with, giving a snappy settle and a faint overshoot instead of a plain
+     ease-out. Dependency-free; valid in both `transition-timing-function` and
+     the Web Animations API. Keep this literal in sync with ARC_SPRING_EASING
+     in ArcTabs.tsx. */
+  --arc-motion-spring: linear(
+    0,
+    0.078 5%,
+    0.241 10%,
+    0.419 15%,
+    0.58 20%,
+    0.712 25%,
+    0.811 30%,
+    0.883 35%,
+    0.931 40%,
+    0.982 50%,
+    1 60%,
+    1.003 70%,
+    1.002 85%,
+    1
+  );
 
   /* Panel corner radii driven by active tab position */
   --arc-panel-tl-radius: 0px;
@@ -109,20 +131,22 @@
   pointer-events: none;
 }
 
-/* Position + size changes always animate once the indicator is ready. */
+/* Position + size changes always animate once the indicator is ready. The
+   slide between tabs uses the spring easing so the card settles with the
+   source component's snappy, faintly-overshooting feel. */
 .arc-tabs__active-indicator.is-ready {
   opacity: 1;
   transition:
-    transform var(--arc-motion-duration) var(--arc-motion-easing),
-    width var(--arc-motion-duration) var(--arc-motion-easing);
+    transform var(--arc-motion-duration) var(--arc-motion-spring),
+    width var(--arc-motion-duration) var(--arc-motion-spring);
 }
 
 /* Opacity only transitions after the user has interacted — prevents a fade-in
    flash on first mount when the indicator goes from ready:false → ready:true. */
 .arc-tabs--has-interacted .arc-tabs__active-indicator.is-ready {
   transition:
-    transform var(--arc-motion-duration) var(--arc-motion-easing),
-    width var(--arc-motion-duration) var(--arc-motion-easing),
+    transform var(--arc-motion-duration) var(--arc-motion-spring),
+    width var(--arc-motion-duration) var(--arc-motion-spring),
     opacity calc(var(--arc-motion-duration) * 0.7) ease;
 }
 

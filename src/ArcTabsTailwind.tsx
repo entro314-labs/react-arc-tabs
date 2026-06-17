@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 
+import { ARC_SPRING_EASING } from './ArcTabs'
 import type { ArcTabItem, ArcTabsProps, ArcTabsRenderState, ArcTabsSize } from './ArcTabs'
 
 type CSSVarStyle = React.CSSProperties & Record<`--${string}`, string | number>
@@ -157,9 +158,6 @@ export function ArcTabsTailwind({
   const previousSelectedIndexRef = React.useRef(selectedIndex)
 
   const [hasInteracted, setHasInteracted] = React.useState(false)
-  const [panelDirection, setPanelDirection] = React.useState<'forward' | 'backward' | 'none'>(
-    'none',
-  )
   const [indicator, setIndicator] = React.useState({
     x: 0,
     width: 0,
@@ -184,10 +182,6 @@ export function ArcTabsTailwind({
 
     if (previous !== selectedIndex) {
       setHasInteracted(true)
-
-      if (selectedIndex >= 0 && previous >= 0) {
-        setPanelDirection(selectedIndex > previous ? 'forward' : 'backward')
-      }
     }
 
     previousSelectedIndexRef.current = selectedIndex
@@ -209,9 +203,6 @@ export function ArcTabsTailwind({
       }
 
       setHasInteracted(true)
-      if (selectedIndex >= 0) {
-        setPanelDirection(index > selectedIndex ? 'forward' : 'backward')
-      }
 
       if (!isControlled) {
         setUncontrolledValue(item.id)
@@ -313,42 +304,38 @@ export function ArcTabsTailwind({
       return
     }
 
-    const offsetX =
+    // Expressive matches the source component: the new panel rises from below
+    // and fades in, settling with the spring easing (no horizontal/scale/blur).
+    // Subtle keeps the understated lift + blur on a plain ease-out.
+    const keyframes: Keyframe[] =
       motionPreset === 'expressive'
-        ? panelDirection === 'forward'
-          ? 20
-          : panelDirection === 'backward'
-            ? -20
-            : 0
-        : 0
+        ? [
+            { opacity: 0, transform: 'translate3d(0, 20px, 0)' },
+            { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+          ]
+        : [
+            {
+              opacity: 0,
+              transform: 'translate3d(0, 6px, 0) scale(0.995)',
+              filter: 'blur(1px)',
+            },
+            {
+              opacity: 1,
+              transform: 'translate3d(0, 0, 0) scale(1)',
+              filter: 'blur(0px)',
+            },
+          ]
 
-    const offsetY = motionPreset === 'expressive' ? 10 : 6
-    const startScale = motionPreset === 'expressive' ? 0.985 : 0.995
-
-    const animation = panelElement.animate(
-      [
-        {
-          opacity: 0,
-          transform: `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${startScale})`,
-          filter: 'blur(1px)',
-        },
-        {
-          opacity: 1,
-          transform: 'translate3d(0, 0, 0) scale(1)',
-          filter: 'blur(0px)',
-        },
-      ],
-      {
-        duration: effectiveMotionDuration,
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both',
-      },
-    )
+    const animation = panelElement.animate(keyframes, {
+      duration: effectiveMotionDuration,
+      easing: motionPreset === 'expressive' ? ARC_SPRING_EASING : 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fill: 'both',
+    })
 
     return () => {
       animation.cancel()
     }
-  }, [selectedIndex, hasInteracted, motionPreset, panelDirection, effectiveMotionDuration])
+  }, [selectedIndex, hasInteracted, motionPreset, effectiveMotionDuration])
 
   const handleTabKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -434,6 +421,10 @@ export function ArcTabsTailwind({
     if (cutoutColor) cssVars['--arc-notch-bg'] = cutoutColor
 
     cssVars['--arc-motion-duration'] = `${effectiveMotionDuration}ms`
+    // Spring easing for the sliding indicator (expressive-only element). Set as
+    // a var here rather than an arbitrary Tailwind class so the verbose
+    // `linear()` literal lives in one place, shared with the WAAPI panel enter.
+    cssVars['--arc-motion-spring'] = ARC_SPRING_EASING
 
     const isFirst = selectedIndex === 0
     const isLast = selectedIndex === items.length - 1
@@ -519,7 +510,7 @@ export function ArcTabsTailwind({
   // a rAF — without this guard it would fade in over ~180ms on every mount,
   // producing a visible flash that looks like hydration mismatch.
   const indicatorClassName = joinClassNames(
-    "pointer-events-none absolute left-0 top-0 z-[1] h-[calc(100%-var(--arc-seam-gap))] w-[var(--arc-indicator-w)] translate-x-[var(--arc-indicator-x)] overflow-visible rounded-t-[var(--arc-tab-radius)] rounded-b-none bg-[var(--arc-panel-bg)] shadow-[var(--arc-surface-shadow)] opacity-0 [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] before:pointer-events-none before:absolute before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-seam-gap)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-full before:bg-[linear-gradient(var(--arc-panel-bg),_var(--arc-panel-bg))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:content-[''] after:pointer-events-none after:absolute after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[var(--arc-notch)] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(var(--arc-notch-offset-y)+var(--arc-seam-gap))] after:bg-[radial-gradient(circle_at_0_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_var(--arc-notch)_no-repeat,radial-gradient(circle_at_100%_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_var(--arc-notch)_no-repeat] after:content-['']",
+    "pointer-events-none absolute left-0 top-0 z-[1] h-[calc(100%-var(--arc-seam-gap))] w-[var(--arc-indicator-w)] translate-x-[var(--arc-indicator-x)] overflow-visible rounded-t-[var(--arc-tab-radius)] rounded-b-none bg-[var(--arc-panel-bg)] shadow-[var(--arc-surface-shadow)] opacity-0 [transition-duration:var(--arc-motion-duration)] [transition-timing-function:var(--arc-motion-spring)] before:pointer-events-none before:absolute before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-seam-gap)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-full before:bg-[linear-gradient(var(--arc-panel-bg),_var(--arc-panel-bg))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:content-[''] after:pointer-events-none after:absolute after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[var(--arc-notch)] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(var(--arc-notch-offset-y)+var(--arc-seam-gap))] after:bg-[radial-gradient(circle_at_0_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_var(--arc-notch)_no-repeat,radial-gradient(circle_at_100%_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_var(--arc-notch)_no-repeat] after:content-['']",
     hasInteracted ? 'transition-[transform,width,opacity]' : 'transition-[transform,width]',
     indicator.ready && 'opacity-100',
     classNames?.indicator,
