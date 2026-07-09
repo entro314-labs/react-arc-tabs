@@ -46,10 +46,11 @@
   --arc-text: #171a2c;
   --arc-tab-bg: #e7ebff;
   --arc-strip-bg: #edf1ff;
-  /* Color drawn INSIDE the notch gradient circle — the visible quarter-arc
-     fill that reads as the curved tab→panel transition. Defaults to the
-     strip background so the flare blends horizontally with the tab bar. */
-  --arc-notch-bg: var(--arc-strip-bg);
+  /* Color painted INSIDE the notch cutout. Defaults to TRANSPARENT so the concave corner reveals
+     whatever sits behind it — the strip OR an adjacent tab — and blends with it (per the Arc
+     inverted-corner spec). Set a solid color only if you deliberately want the cutout tinted; note a
+     solid fill will stamp the notch shape onto neighbouring tabs that have their own background. */
+  --arc-notch-bg: transparent;
   --arc-tab-hover-bg: #dce3ff;
   --arc-panel-bg: #ffffff;
   --arc-panel-border: #cfd6f5;
