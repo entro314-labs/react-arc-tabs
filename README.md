@@ -140,6 +140,10 @@ export default function Page() {
 - `cutoutColor?: string` (color of the concave seam cutouts; defaults to strip background)
 - `keepMounted?: boolean`
 - `ariaLabel?: string`
+- `tabElement?: "button" | "div"` (default `"button"`; pass `"div"` when `renderTabLabel` nests
+  interactive controls such as close/pin buttons — nested buttons inside the default `<button>`
+  trigger are invalid HTML. The div trigger keeps full tab semantics: `role="tab"`, roving
+  tabindex, arrow-key navigation, and Enter/Space activation in every activation mode)
 
 By default, the component derives radii from concentric rules:
 

@@ -55,6 +55,13 @@ export interface ArcTabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   emptyState?: React.ReactNode
   renderTabLabel?: (item: ArcTabItem, state: ArcTabsRenderState) => React.ReactNode
   renderPanel?: (item: ArcTabItem, state: ArcTabsRenderState) => React.ReactNode
+  /**
+   * Element used for the tab trigger. The default `'button'` is right for plain labels; pass
+   * `'div'` when `renderTabLabel` nests interactive controls (close/pin buttons) — nested buttons
+   * inside a `<button>` are invalid HTML. The div variant keeps the full tab semantics: `role="tab"`,
+   * roving tabindex, arrow-key navigation, and Enter/Space activation regardless of activation mode.
+   */
+  tabElement?: 'button' | 'div'
 }
 
 /**
@@ -125,6 +132,7 @@ export function ArcTabs({
   emptyState = null,
   renderTabLabel,
   renderPanel,
+  tabElement = 'button',
   className,
   style,
   ...rest
@@ -184,7 +192,7 @@ export function ArcTabs({
 
   const enabledIndices = React.useMemo(() => getEnabledIndices(items), [items])
 
-  const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([])
+  const tabRefs = React.useRef<Array<HTMLButtonElement | HTMLDivElement | null>>([])
   const listScrollRef = React.useRef<HTMLDivElement | null>(null)
   const listRef = React.useRef<HTMLUListElement | null>(null)
   const activePanelRef = React.useRef<HTMLElement | null>(null)
@@ -307,8 +315,8 @@ export function ArcTabs({
       if (listScrollElement) {
         observer.observe(listScrollElement)
       }
-      tabRefs.current.forEach((tabElement) => {
-        if (tabElement) observer?.observe(tabElement)
+      tabRefs.current.forEach((tabNode) => {
+        if (tabNode) observer?.observe(tabNode)
       })
     }
 
@@ -372,7 +380,7 @@ export function ArcTabs({
   }, [selectedIndex, hasInteracted, motionPreset, effectiveMotionDuration])
 
   const handleTabKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    (event: React.KeyboardEvent<HTMLElement>, index: number) => {
       if (!enabledIndices.length) return
 
       switch (event.key) {
@@ -415,7 +423,9 @@ export function ArcTabs({
         case 'Enter':
         case ' ':
         case 'Spacebar': {
-          if (activationMode === 'manual') {
+          // A native <button> synthesizes click on Enter/Space, so automatic mode needs no help —
+          // but a <div role="tab"> does not, so the div trigger activates here in every mode.
+          if (activationMode === 'manual' || tabElement === 'div') {
             event.preventDefault()
             selectTab(index)
           }
@@ -425,7 +435,7 @@ export function ArcTabs({
           break
       }
     },
-    [activationMode, enabledIndices, focusTabIndex, selectTab],
+    [activationMode, enabledIndices, focusTabIndex, selectTab, tabElement],
   )
 
   // Only sets a CSS var inline when the consumer passed a matching prop.
@@ -553,30 +563,59 @@ export function ArcTabs({
                 key={item.id}
                 role="presentation"
               >
-                <button
-                  id={tabId}
-                  ref={(node) => {
-                    tabRefs.current[index] = node
-                  }}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  aria-controls={panelId}
-                  tabIndex={tabIndexValue}
-                  disabled={disabled}
-                  className="arc-tabs__tab"
-                  onFocus={() => {
-                    setFocusedIndex(index)
-                  }}
-                  onClick={() => {
-                    selectTab(index)
-                  }}
-                  onKeyDown={(event) => {
-                    handleTabKeyDown(event, index)
-                  }}
-                >
-                  {renderTabLabel ? renderTabLabel(item, state) : renderDefaultLabel(item)}
-                </button>
+                {tabElement === 'div' ? (
+                  <div
+                    id={tabId}
+                    ref={(node) => {
+                      tabRefs.current[index] = node
+                    }}
+                    role="tab"
+                    aria-selected={selected}
+                    aria-controls={panelId}
+                    aria-disabled={disabled || undefined}
+                    tabIndex={tabIndexValue}
+                    className="arc-tabs__tab"
+                    onFocus={() => {
+                      if (disabled) return
+                      setFocusedIndex(index)
+                    }}
+                    onClick={() => {
+                      if (disabled) return
+                      selectTab(index)
+                    }}
+                    onKeyDown={(event) => {
+                      if (disabled) return
+                      handleTabKeyDown(event, index)
+                    }}
+                  >
+                    {renderTabLabel ? renderTabLabel(item, state) : renderDefaultLabel(item)}
+                  </div>
+                ) : (
+                  <button
+                    id={tabId}
+                    ref={(node) => {
+                      tabRefs.current[index] = node
+                    }}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    aria-controls={panelId}
+                    tabIndex={tabIndexValue}
+                    disabled={disabled}
+                    className="arc-tabs__tab"
+                    onFocus={() => {
+                      setFocusedIndex(index)
+                    }}
+                    onClick={() => {
+                      selectTab(index)
+                    }}
+                    onKeyDown={(event) => {
+                      handleTabKeyDown(event, index)
+                    }}
+                  >
+                    {renderTabLabel ? renderTabLabel(item, state) : renderDefaultLabel(item)}
+                  </button>
+                )}
               </li>
             )
           })}
