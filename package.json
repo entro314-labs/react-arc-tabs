@@ -1,6 +1,6 @@
 {
   "name": "@entro314labs/react-arc-tabs",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "private": false,
   "description": "Reusable arc-style tabs component for React and Next.js projects",
   "keywords": [
