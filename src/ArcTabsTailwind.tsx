@@ -95,7 +95,7 @@ export function ArcTabsTailwind({
   style,
   classNames,
   ...rest
-}: ArcTabsTailwindProps) {
+}: ArcTabsTailwindProps): React.JSX.Element {
   const reactId = React.useId()
   const baseId = React.useMemo(
     () => (listId ?? `arc-tabs-${reactId}`).replace(/:/g, ''),

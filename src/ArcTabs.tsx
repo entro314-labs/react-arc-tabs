@@ -136,7 +136,7 @@ export function ArcTabs({
   className,
   style,
   ...rest
-}: ArcTabsProps) {
+}: ArcTabsProps): React.JSX.Element {
   const reactId = React.useId()
   const baseId = React.useMemo(
     () => (listId ?? `arc-tabs-${reactId}`).replace(/:/g, ''),
