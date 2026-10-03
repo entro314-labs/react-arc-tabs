@@ -54,9 +54,9 @@ const getNextEnabledIndex = (enabledIndices: number[], currentIndex: number, dir
 }
 
 const sizeClassMap: Record<ArcTabsSize, string> = {
-  sm: 'min-h-9 px-3 py-1.5 text-sm',
-  md: 'min-h-10 px-4 py-2 text-[0.95rem]',
-  lg: 'min-h-12 px-5 py-2.5 text-base',
+  sm: 'min-h-9 aria-selected:min-h-[calc(2.25rem+var(--arc-border-width))] px-3 py-1.5 text-sm',
+  md: 'min-h-10 aria-selected:min-h-[calc(2.5rem+var(--arc-border-width))] px-4 py-2 text-[0.95rem]',
+  lg: 'min-h-12 aria-selected:min-h-[calc(3rem+var(--arc-border-width))] px-5 py-2.5 text-base',
 }
 
 export function ArcTabsTailwind({
@@ -461,7 +461,7 @@ export function ArcTabsTailwind({
   ])
 
   const rootClassName = joinClassNames(
-    'arc-tabs-tw w-full isolate text-[var(--arc-text)] [--arc-radius:16px] [--arc-gap:2px] [--arc-strip-padding:4px] [--arc-seam-gap:0px] [--arc-border-width:1px] [--arc-tab-radius:max(0px,calc(var(--arc-radius)-var(--arc-strip-padding)))] [--arc-panel-corner-radius:max(0px,calc(var(--arc-radius)-(var(--arc-strip-padding)*2)))] [--arc-notch:var(--arc-tab-radius)] [--arc-notch-offset-y:0%] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-strip-bg:#edf1ff] [--arc-notch-bg:transparent] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-divider:var(--arc-panel-border)] [--arc-divider-inset:25%] [--arc-motion-duration:260ms] [--arc-surface-shadow:0_1px_2px_rgba(15,23,42,0.08)] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-strip-bg:#26304d] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e] dark:[--arc-surface-shadow:0_1px_2px_rgba(2,8,20,0.52)]',
+    'arc-tabs-tw w-full isolate text-[var(--arc-text)] [--arc-radius:16px] [--arc-gap:2px] [--arc-strip-padding:4px] [--arc-seam-gap:0px] [--arc-border-width:1px] [--arc-tab-radius:max(0px,calc(var(--arc-radius)-var(--arc-strip-padding)))] [--arc-panel-corner-radius:max(0px,calc(var(--arc-radius)-(var(--arc-strip-padding)*2)))] [--arc-notch:var(--arc-tab-radius)] [--arc-notch-offset-y:0%] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-strip-bg:#edf1ff] [--arc-notch-bg:transparent] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-divider:var(--arc-panel-border)] [--arc-divider-inset:25%] [--arc-motion-duration:260ms] [--arc-surface-shadow:0_2px_2px_rgba(15,23,42,0.08)] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-strip-bg:#26304d] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e] dark:[--arc-surface-shadow:0_2px_2px_rgba(2,8,20,0.52)]',
     classNames?.root,
     className,
   )
@@ -614,11 +614,17 @@ export function ArcTabsTailwind({
               // and a value that also carries position / size / repeat is invalid there, so the
               // browser dropped the declaration and neither the seam nor the notch was painted.
               // Pseudo-element seam (::before)
-              "before:pointer-events-none before:absolute before:content-[''] before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-seam-gap)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-full before:[background:linear-gradient(var(--arc-tab-fill),_var(--arc-tab-fill))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:opacity-0 before:transition-opacity before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              "before:pointer-events-none before:absolute before:content-[''] before:top-[calc(100%+var(--arc-border-width))] before:left-[calc(var(--arc-notch)*-1)] before:h-[calc(var(--arc-seam-gap)+var(--arc-border-width))] before:w-[calc(100%+var(--arc-notch)*2)] before:[background:linear-gradient(var(--arc-tab-fill),_var(--arc-tab-fill))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:opacity-0 before:transition-opacity before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
               // Pseudo-element notch corners (::after)
-              "after:pointer-events-none after:absolute after:content-[''] after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[var(--arc-notch)] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(var(--arc-notch-offset-y)+var(--arc-seam-gap))] after:[background:radial-gradient(circle_at_0_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-tab-fill)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_var(--arc-notch)_no-repeat,radial-gradient(circle_at_100%_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-tab-fill)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_var(--arc-notch)_no-repeat] after:opacity-0 after:transition-opacity after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-              // Selected state (aria-selected="true" → attribute-selector specificity wins)
-              'aria-selected:z-[3] aria-selected:rounded-b-none aria-selected:border-b-0 aria-selected:text-[var(--arc-text)] aria-selected:[--arc-tab-fill:var(--arc-panel-bg)] aria-selected:shadow-[var(--arc-surface-shadow)]',
+              "after:pointer-events-none after:absolute after:content-[''] after:bottom-[calc(var(--arc-border-width)*-2)] after:left-[calc(var(--arc-notch)*-1)] after:h-[calc(var(--arc-notch)+var(--arc-border-width))] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(var(--arc-notch-offset-y)+var(--arc-seam-gap))] after:[background:radial-gradient(circle_at_0_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-tab-fill)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_calc(var(--arc-notch)+var(--arc-border-width))_no-repeat,radial-gradient(circle_at_100%_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-tab-fill)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_calc(var(--arc-notch)+var(--arc-border-width))_no-repeat] after:opacity-0 after:transition-opacity after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              // Selected state (aria-selected="true" → attribute-selector specificity wins).
+              // The selected tab reaches one border-width behind the panel - a second width of
+              // transparent bottom border handed back as a negative margin, plus the matching
+              // min-height in sizeClassMap - so the two overlap instead of merely meeting. Boxes
+              // that meet at a fractional pixel each anti-alias their own edge, and the strip shows
+              // through the shared row as a hairline. Both pseudo-elements above end on that same
+              // line, one border-width past the strip's bottom edge.
+              'aria-selected:z-[3] aria-selected:rounded-b-none aria-selected:border-b-[length:calc(var(--arc-border-width)*2)] aria-selected:border-b-transparent aria-selected:mb-[calc(var(--arc-border-width)*-1)] aria-selected:text-[var(--arc-text)] aria-selected:[--arc-tab-fill:var(--arc-panel-bg)] aria-selected:shadow-[var(--arc-surface-shadow)]',
               'aria-selected:before:opacity-100 aria-selected:after:opacity-100',
               // Size + fit
               sizeClassMap[size],

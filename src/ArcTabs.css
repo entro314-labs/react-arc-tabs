@@ -30,7 +30,12 @@
      at all. Raise it only if the strip itself continues below the tabs. Accepts
      any <length-percentage>. */
   --arc-notch-offset-y: 0%;
-  --arc-surface-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  /* Shared by the panel and the selected tab. Its y-offset must be at least its
+     blur, so that it never reaches ABOVE the box that casts it: the panel is
+     stacked over the strip, and a shadow that rises past the panel's top edge
+     lands on the last pixel row of the selected tab - a hairline across the one
+     junction that has to be seamless. (It was `0 1px 2px`, which rose 1px.) */
+  --arc-surface-shadow: 0 2px 2px rgba(15, 23, 42, 0.08);
   --arc-motion-duration: 260ms;
   --arc-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
   /* `linear()` approximation of a spring (stiffness 400, damping 35, mass 1) —
@@ -94,7 +99,7 @@
     --arc-tab-hover-bg: #374268;
     --arc-panel-bg: #1c243b;
     --arc-panel-border: #46527e;
-    --arc-surface-shadow: 0 1px 2px rgba(2, 8, 20, 0.52);
+    --arc-surface-shadow: 0 2px 2px rgba(2, 8, 20, 0.52);
   }
 }
 
@@ -261,20 +266,25 @@
     box-shadow var(--arc-motion-duration) var(--arc-motion-easing);
 }
 
+/* The height is a custom property as well as a declaration, because the
+   selected tab is that height plus one border-width (see its rule below). */
 .arc-tabs--size-sm .arc-tabs__tab {
-  min-height: 2.25rem;
+  --arc-tab-height: 2.25rem;
+  min-height: var(--arc-tab-height);
   padding: 0.35rem 0.75rem;
   font-size: 0.875rem;
 }
 
 .arc-tabs--size-md .arc-tabs__tab {
-  min-height: 2.6rem;
+  --arc-tab-height: 2.6rem;
+  min-height: var(--arc-tab-height);
   padding: 0.55rem 1rem;
   font-size: 0.95rem;
 }
 
 .arc-tabs--size-lg .arc-tabs__tab {
-  min-height: 3rem;
+  --arc-tab-height: 3rem;
+  min-height: var(--arc-tab-height);
   padding: 0.65rem 1.2rem;
   font-size: 1rem;
 }
@@ -308,21 +318,24 @@
     transform var(--arc-motion-duration) var(--arc-motion-easing);
 }
 
+/* Both pseudo-elements are placed against the SELECTED tab's padding box, which
+   stops one border-width above the strip's bottom edge (its bottom border is
+   two wide, see below). Each therefore starts from that edge and ends one
+   border-width past it, behind the panel, like the tab itself. */
 .arc-tabs__tab::before {
-  bottom: 0;
+  top: calc(100% + var(--arc-border-width));
   left: calc(var(--arc-notch) * -1);
   width: calc(100% + (var(--arc-notch) * 2));
-  height: var(--arc-seam-gap);
-  transform: translateY(100%);
+  height: calc(var(--arc-seam-gap) + var(--arc-border-width));
   background: linear-gradient(var(--arc-tab-fill), var(--arc-tab-fill)) center top /
     calc(100% - (var(--arc-notch) * 2)) 100% no-repeat;
 }
 
 .arc-tabs__tab::after {
-  bottom: 0;
+  bottom: calc(var(--arc-border-width) * -2);
   left: calc(var(--arc-notch) * -1);
   width: calc(100% + (var(--arc-notch) * 2));
-  height: var(--arc-notch);
+  height: calc(var(--arc-notch) + var(--arc-border-width));
   transform: translateY(calc(var(--arc-notch-offset-y) + var(--arc-seam-gap)));
   /* Gradient circle centers sit at the OUTER corners of the gutter — the
      visible quarter-arc attaches at the outer-bottom and curves inward to
@@ -335,7 +348,7 @@
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
         var(--arc-tab-fill) calc(var(--arc-notch) + 0.5px)
       )
-      left top / var(--arc-notch) var(--arc-notch) no-repeat,
+      left top / var(--arc-notch) calc(var(--arc-notch) + var(--arc-border-width)) no-repeat,
     radial-gradient(
         circle at 100% 0,
         var(--arc-notch-bg) calc(var(--arc-notch) - var(--arc-border-width)),
@@ -343,7 +356,7 @@
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
         var(--arc-tab-fill) calc(var(--arc-notch) + 0.5px)
       )
-      right top / var(--arc-notch) var(--arc-notch) no-repeat;
+      right top / var(--arc-notch) calc(var(--arc-notch) + var(--arc-border-width)) no-repeat;
 }
 
 .arc-tabs__tab[aria-selected='true']::before,
@@ -355,7 +368,17 @@
   z-index: 3;
   color: var(--arc-text);
   border-color: var(--arc-panel-border);
-  border-bottom-width: 0;
+  /* The selected tab reaches one border-width BEHIND the panel, which is stacked
+     over the strip. Two boxes that merely meet at a fractional pixel position
+     each anti-alias their own edge, and the strip shows through the row they
+     share as a hairline - at 1x, 1.25x, 1.5x and 3x in the default theme. With
+     the tab's own box under the panel's top edge, that edge blends panel colour
+     onto tab colour, which is the same colour. The reach is a second width of
+     transparent bottom border (the fill paints under it) handed back as a
+     negative margin, so the label sits exactly where an unselected tab's does. */
+  border-bottom: calc(var(--arc-border-width) * 2) solid transparent;
+  min-height: calc(var(--arc-tab-height) + var(--arc-border-width));
+  margin-bottom: calc(var(--arc-border-width) * -1);
   --arc-tab-fill: var(--arc-panel-bg);
   border-top-left-radius: var(--arc-tab-radius);
   border-top-right-radius: var(--arc-tab-radius);
