@@ -143,6 +143,17 @@ export function ArcTabsTailwind({
 
   const [focusedIndex, setFocusedIndex] = React.useState<number>(selectedIndex)
 
+  // The tab stop belongs to the selected tab. Whenever the selection moves - a click, a key, or
+  // the owner changing `value` - the roving index moves with it; it used to stay on whichever tab
+  // was focused last, so Tab landed on a tab that was no longer the active one. Adjusted during
+  // render rather than in an effect, so no frame is painted with the old stop. Arrow keys in
+  // manual mode move focus WITHOUT moving the selection, and are untouched by this.
+  const [syncedSelectedIndex, setSyncedSelectedIndex] = React.useState<number>(selectedIndex)
+  if (syncedSelectedIndex !== selectedIndex) {
+    setSyncedSelectedIndex(selectedIndex)
+    setFocusedIndex(selectedIndex)
+  }
+
   React.useEffect(() => {
     // A focused tab that still exists keeps the roving index, selection or no selection - with
     // nothing selected the arrow keys must still be able to walk the strip. Only a stale index is
