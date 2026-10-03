@@ -579,25 +579,27 @@ export function ArcTabsTailwind({
               'relative inline-flex items-center justify-center gap-2 whitespace-nowrap',
               // Text
               'text-inherit font-semibold leading-none select-none',
-              // Baseline visuals (unselected)
-              'rounded-[var(--arc-tab-radius)] border border-[var(--arc-panel-border)] bg-[var(--arc-tab-bg)]',
+              // Baseline visuals (unselected). Every state sets `--arc-tab-fill` and the box and
+              // the notch pseudo-elements paint from it, so the two cannot disagree; registering
+              // the property (see README) lets the notch fade with the box instead of snapping.
+              'rounded-[var(--arc-tab-radius)] border border-[var(--arc-panel-border)] [--arc-tab-fill:var(--arc-tab-bg)] bg-[var(--arc-tab-fill)]',
               // Transitions
-              'transition-[background-color,color,border-color,box-shadow] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+              'transition-[--arc-tab-fill,background-color,color,border-color,box-shadow] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
               // Focus
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--arc-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--arc-panel-bg)]',
               // Disabled
               'disabled:cursor-not-allowed disabled:opacity-45',
               // Hover (unselected, enabled only)
-              'aria-[selected=false]:enabled:hover:bg-[var(--arc-tab-hover-bg)]',
+              'aria-[selected=false]:enabled:hover:[--arc-tab-fill:var(--arc-tab-hover-bg)]',
               // Active press (unselected, enabled) — snaps because transform
               // is not in the transition list
               'aria-[selected=false]:enabled:active:translate-y-px',
               // Pseudo-element seam (::before)
-              "before:pointer-events-none before:absolute before:content-[''] before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-seam-gap)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-full before:bg-[linear-gradient(var(--arc-panel-bg),_var(--arc-panel-bg))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:opacity-0 before:transition-opacity before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              "before:pointer-events-none before:absolute before:content-[''] before:bottom-0 before:left-[calc(var(--arc-notch)*-1)] before:h-[var(--arc-seam-gap)] before:w-[calc(100%+var(--arc-notch)*2)] before:translate-y-full before:bg-[linear-gradient(var(--arc-tab-fill),_var(--arc-tab-fill))_center_top/calc(100%-var(--arc-notch)*2)_100%_no-repeat] before:opacity-0 before:transition-opacity before:[transition-duration:var(--arc-motion-duration)] before:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
               // Pseudo-element notch corners (::after)
-              "after:pointer-events-none after:absolute after:content-[''] after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[var(--arc-notch)] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(var(--arc-notch-offset-y)+var(--arc-seam-gap))] after:bg-[radial-gradient(circle_at_0_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_var(--arc-notch)_no-repeat,radial-gradient(circle_at_100%_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-panel-bg)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_var(--arc-notch)_no-repeat] after:opacity-0 after:transition-opacity after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
+              "after:pointer-events-none after:absolute after:content-[''] after:bottom-0 after:left-[calc(var(--arc-notch)*-1)] after:h-[var(--arc-notch)] after:w-[calc(100%+var(--arc-notch)*2)] after:translate-y-[calc(var(--arc-notch-offset-y)+var(--arc-seam-gap))] after:bg-[radial-gradient(circle_at_0_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-tab-fill)_calc(var(--arc-notch)+0.5px))_left_top/var(--arc-notch)_var(--arc-notch)_no-repeat,radial-gradient(circle_at_100%_0,var(--arc-notch-bg)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-var(--arc-border-width)),var(--arc-panel-border)_calc(var(--arc-notch)-0.5px),var(--arc-tab-fill)_calc(var(--arc-notch)+0.5px))_right_top/var(--arc-notch)_var(--arc-notch)_no-repeat] after:opacity-0 after:transition-opacity after:[transition-duration:var(--arc-motion-duration)] after:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
               // Selected state (aria-selected="true" → attribute-selector specificity wins)
-              'aria-selected:z-[3] aria-selected:rounded-b-none aria-selected:border-b-0 aria-selected:text-[var(--arc-text)] aria-selected:bg-[var(--arc-panel-bg)] aria-selected:shadow-[var(--arc-surface-shadow)]',
+              'aria-selected:z-[3] aria-selected:rounded-b-none aria-selected:border-b-0 aria-selected:text-[var(--arc-text)] aria-selected:[--arc-tab-fill:var(--arc-panel-bg)] aria-selected:shadow-[var(--arc-surface-shadow)]',
               'aria-selected:before:opacity-100 aria-selected:after:opacity-100',
               // Size + fit
               sizeClassMap[size],

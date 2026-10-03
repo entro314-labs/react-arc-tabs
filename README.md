@@ -81,6 +81,21 @@ export function ExampleTailwind() {
 }
 ```
 
+### Notch fade
+
+Each tab paints from one custom property, `--arc-tab-fill`, and its notch reads the same value.
+`styles.css` registers it as a colour so it can be transitioned and the notch fades with the tab.
+`ArcTabsTailwind` does not ship a stylesheet, so add the registration to your own CSS; without it
+everything still renders, but the notch jumps to its final colour while the tab is still fading:
+
+```css
+@property --arc-tab-fill {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+```
+
 ### Tailwind source scanning
 
 If your setup does not automatically scan classes from installed dependencies, add:

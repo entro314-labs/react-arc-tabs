@@ -1,3 +1,17 @@
+/* The colour a tab is painted in, whatever state it is in. Each state sets it,
+   the tab's box paints it, and the notch pseudo-elements read it for the part
+   of the gradient that continues the tab. Registered as a colour so the
+   property itself can be transitioned: a gradient does not interpolate, so
+   without this the notch would sit in its final colour while the box was still
+   fading toward it. Engines without `@property` ignore the registration and the
+   box still fades through `background-color`; only the notch snaps there.
+   `inherits: true` is what carries the value into `::before` / `::after`. */
+@property --arc-tab-fill {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
 .arc-tabs {
   --arc-radius: 16px;
   --arc-gap: 2px;
@@ -218,7 +232,8 @@
   gap: 0.5rem;
   border: var(--arc-border-width) solid var(--arc-panel-border);
   border-radius: var(--arc-tab-radius);
-  background: var(--arc-tab-bg);
+  --arc-tab-fill: var(--arc-tab-bg);
+  background: var(--arc-tab-fill);
   color: inherit;
   font: inherit;
   font-weight: 650;
@@ -231,6 +246,7 @@
      they snap together with the selected background change — animating
      them alongside a color fade caused visible edge jitter. */
   transition:
+    --arc-tab-fill var(--arc-motion-duration) var(--arc-motion-easing),
     background-color var(--arc-motion-duration) var(--arc-motion-easing),
     color var(--arc-motion-duration) var(--arc-motion-easing),
     border-color var(--arc-motion-duration) var(--arc-motion-easing),
@@ -256,7 +272,7 @@
 }
 
 .arc-tabs__tab:not([aria-selected='true']):not(:disabled):hover {
-  background: var(--arc-tab-hover-bg);
+  --arc-tab-fill: var(--arc-tab-hover-bg);
 }
 
 .arc-tabs__tab:not([aria-selected='true']):not(:disabled):active {
@@ -290,7 +306,7 @@
   width: calc(100% + (var(--arc-notch) * 2));
   height: var(--arc-seam-gap);
   transform: translateY(100%);
-  background: linear-gradient(var(--arc-panel-bg), var(--arc-panel-bg)) center top /
+  background: linear-gradient(var(--arc-tab-fill), var(--arc-tab-fill)) center top /
     calc(100% - (var(--arc-notch) * 2)) 100% no-repeat;
 }
 
@@ -309,7 +325,7 @@
         var(--arc-notch-bg) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
-        var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
+        var(--arc-tab-fill) calc(var(--arc-notch) + 0.5px)
       )
       left top / var(--arc-notch) var(--arc-notch) no-repeat,
     radial-gradient(
@@ -317,7 +333,7 @@
         var(--arc-notch-bg) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - var(--arc-border-width)),
         var(--arc-panel-border) calc(var(--arc-notch) - 0.5px),
-        var(--arc-panel-bg) calc(var(--arc-notch) + 0.5px)
+        var(--arc-tab-fill) calc(var(--arc-notch) + 0.5px)
       )
       right top / var(--arc-notch) var(--arc-notch) no-repeat;
 }
@@ -332,7 +348,7 @@
   color: var(--arc-text);
   border-color: var(--arc-panel-border);
   border-bottom-width: 0;
-  background: var(--arc-panel-bg);
+  --arc-tab-fill: var(--arc-panel-bg);
   border-top-left-radius: var(--arc-tab-radius);
   border-top-right-radius: var(--arc-tab-radius);
   border-bottom-left-radius: 0;
