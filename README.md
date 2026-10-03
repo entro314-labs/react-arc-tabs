@@ -156,7 +156,8 @@ export default function Page() {
 - `notch?: number | string` (controls inverted corner curve size)
   - `--arc-notch-offset-y` (custom property, default `0%`) moves the curve tiles down from the
     tab's bottom edge; leave it at `0%` unless the strip continues below the tabs
-- `cutoutColor?: string` (color of the concave seam cutouts; defaults to strip background)
+- `cutoutColor?: string` (colour painted inside the concave cutouts; transparent by default, so a
+  cutout shows the strip or the neighbouring tab behind it)
 - `keepMounted?: boolean`
 - `ariaLabel?: string`
 - `tabElement?: "button" | "div"` (default `"button"`; pass `"div"` when `renderTabLabel` nests

@@ -493,7 +493,7 @@ export function ArcTabs({
     if (tabHoverBackground) cssVars['--arc-tab-hover-bg'] = tabHoverBackground
     if (panelBackground) cssVars['--arc-panel-bg'] = panelBackground
     if (panelBorderColor) cssVars['--arc-panel-border'] = panelBorderColor
-    if (cutoutColor) cssVars['--arc-cutout-bg'] = cutoutColor
+    if (cutoutColor) cssVars['--arc-notch-bg'] = cutoutColor
 
     cssVars['--arc-motion-duration'] = `${effectiveMotionDuration}ms`
 
