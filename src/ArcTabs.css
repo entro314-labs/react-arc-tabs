@@ -289,11 +289,14 @@
   font-size: 1rem;
 }
 
-.arc-tabs__tab:not([aria-selected='true']):not(:disabled):hover {
+/* `aria-disabled` stands in for `:disabled` on the `<div role="tab">` trigger,
+   which can never match the pseudo-class. Both sit in ONE `:not()` so the
+   selector weighs what it always did and consumer overrides keep winning. */
+.arc-tabs__tab:not([aria-selected='true']):not(:disabled, [aria-disabled='true']):hover {
   --arc-tab-fill: var(--arc-tab-hover-bg);
 }
 
-.arc-tabs__tab:not([aria-selected='true']):not(:disabled):active {
+.arc-tabs__tab:not([aria-selected='true']):not(:disabled, [aria-disabled='true']):active {
   transform: translateY(1px);
 }
 
@@ -302,7 +305,8 @@
   outline-offset: 2px;
 }
 
-.arc-tabs__tab:disabled {
+.arc-tabs__tab:disabled,
+.arc-tabs__tab[aria-disabled='true'] {
   opacity: 0.45;
   cursor: not-allowed;
 }

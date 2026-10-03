@@ -609,17 +609,19 @@ export function ArcTabsTailwind({
               'transition-[--arc-tab-fill,background-color,color,border-color,box-shadow] [transition-duration:var(--arc-motion-duration)] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
               // Focus
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--arc-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--arc-panel-bg)]',
-              // Disabled
-              'disabled:cursor-not-allowed disabled:opacity-45',
+              // Disabled. A `<div role="tab">` is never `:disabled`, so the div trigger is matched
+              // through `aria-disabled` as well - here and in the two rules below, which used
+              // `enabled:` and therefore never applied to a div tab at all.
+              'disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:cursor-not-allowed aria-disabled:opacity-45',
               // Flat appearance: an unselected tab has no box, only its label on the strip. The
               // hover utility below carries more variants, so it still raises its chip.
               appearance === 'flat' &&
                 'aria-[selected=false]:[--arc-tab-fill:transparent] aria-[selected=false]:border-transparent',
-              // Hover (unselected, enabled only)
-              'aria-[selected=false]:enabled:hover:[--arc-tab-fill:var(--arc-tab-hover-bg)]',
+              // Hover (unselected, not disabled)
+              'aria-[selected=false]:not-disabled:not-aria-disabled:hover:[--arc-tab-fill:var(--arc-tab-hover-bg)]',
               // Active press (unselected, enabled) — snaps because transform
               // is not in the transition list
-              'aria-[selected=false]:enabled:active:translate-y-px',
+              'aria-[selected=false]:not-disabled:not-aria-disabled:active:translate-y-px',
               // Both pseudo-elements set the `background` SHORTHAND through an arbitrary property
               // (as do the sliding indicator's). `bg-[...]` types a gradient as `background-image`,
               // and a value that also carries position / size / repeat is invalid there, so the
