@@ -154,6 +154,8 @@ export default function Page() {
 - `tabRadius?: number | string` (optional explicit tab radius override)
 - `seamGap?: number | string` (vertical distance between active tab and panel; default `0` for a fused shape)
 - `notch?: number | string` (controls inverted corner curve size)
+  - `--arc-notch-offset-y` (custom property, default `0%`) moves the curve tiles down from the
+    tab's bottom edge; leave it at `0%` unless the strip continues below the tabs
 - `cutoutColor?: string` (color of the concave seam cutouts; defaults to strip background)
 - `keepMounted?: boolean`
 - `ariaLabel?: string`

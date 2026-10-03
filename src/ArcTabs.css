@@ -21,11 +21,15 @@
   --arc-tab-radius: max(0px, calc(var(--arc-radius) - var(--arc-strip-padding)));
   --arc-panel-corner-radius: max(0px, calc(var(--arc-radius) - (var(--arc-strip-padding) * 2)));
   --arc-notch: var(--arc-tab-radius);
-  /* Vertical offset of the notch pseudo below the tab. Library default pushes
-     the pseudo fully below the tab (100%). Consumers embedding tabs in a
-     flush layout (no separate panel) can lower this to pull the notch up
-     into the tab's bottom area. Accepts any <length-percentage>. */
-  --arc-notch-offset-y: 100%;
+  /* How far below the tab's bottom edge the notch tiles sit, as a share of their
+     own height. At 0% they flank the tab's last `--arc-notch` of height, over
+     the strip, which is the only place the curve can be seen: the cutout shows
+     the strip (or a neighbouring tab) and the rest continues the tab. It was
+     100%, which put the tiles under the panel - panel colour drawn on panel,
+     beneath it in the stacking order - so the default rendering had no curves
+     at all. Raise it only if the strip itself continues below the tabs. Accepts
+     any <length-percentage>. */
+  --arc-notch-offset-y: 0%;
   --arc-surface-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
   --arc-motion-duration: 260ms;
   --arc-motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
