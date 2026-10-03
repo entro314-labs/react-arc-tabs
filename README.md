@@ -146,6 +146,7 @@ export default function Page() {
 - `activationMode?: "automatic" | "manual"`
 - `size?: "sm" | "md" | "lg"`
 - `fit?: "content" | "equal"`
+- `appearance?: "filled" | "flat"` (default `"filled"`; see [Appearance](#appearance))
 - `motionPreset?: "none" | "subtle" | "expressive"`
 - `motionDuration?: number`
 - `radius?: number` (outer shell radius)
@@ -160,6 +161,23 @@ export default function Page() {
   interactive controls such as close/pin buttons — nested buttons inside the default `<button>`
   trigger are invalid HTML. The div trigger keeps full tab semantics: `role="tab"`, roving
   tabindex, arrow-key navigation, and Enter/Space activation in every activation mode)
+
+### Appearance
+
+`appearance="filled"` (the default) draws every tab as its own box. `appearance="flat"` is the
+browser model: an unselected tab is only its label on the strip, with a hairline divider between
+neighbours, so the selected tab is the one tab-shaped object. Hovering an unselected tab still
+raises a chip in `--arc-tab-hover-bg`, and the dividers on both sides of a hovered or selected tab
+drop out.
+
+```tsx
+<ArcTabs items={items} appearance="flat" />
+```
+
+The divider is themed with two custom properties:
+
+- `--arc-divider` (colour; defaults to `--arc-panel-border`)
+- `--arc-divider-inset` (distance from the tab's top and bottom edges; defaults to `25%`)
 
 ### Controlled selection
 

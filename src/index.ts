@@ -3,6 +3,7 @@ export { ArcTabsTailwind } from './ArcTabsTailwind'
 export type {
   ArcTabItem,
   ArcTabsActivationMode,
+  ArcTabsAppearance,
   ArcTabsFit,
   ArcTabsMotionPreset,
   ArcTabsProps,

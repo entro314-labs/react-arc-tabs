@@ -15,6 +15,7 @@ export type ArcTabsActivationMode = 'automatic' | 'manual'
 export type ArcTabsSize = 'sm' | 'md' | 'lg'
 export type ArcTabsFit = 'content' | 'equal'
 export type ArcTabsMotionPreset = 'none' | 'subtle' | 'expressive'
+export type ArcTabsAppearance = 'filled' | 'flat'
 
 export interface ArcTabsRenderState {
   index: number
@@ -39,6 +40,14 @@ export interface ArcTabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   keepMounted?: boolean
   size?: ArcTabsSize
   fit?: ArcTabsFit
+  /**
+   * How unselected tabs are drawn. `'filled'` (the default) gives every tab its own box.
+   * `'flat'` is the browser model: an unselected tab is only its label on the strip, with a
+   * hairline divider between neighbours, so the selected tab is the one tab-shaped object. Hover
+   * still raises a chip in `--arc-tab-hover-bg`. The divider reads `--arc-divider` (defaults to
+   * the panel border colour) and `--arc-divider-inset` (defaults to 25% top and bottom).
+   */
+  appearance?: ArcTabsAppearance
   motionPreset?: ArcTabsMotionPreset
   motionDuration?: number
   ariaLabel?: string
@@ -116,6 +125,7 @@ export function ArcTabs({
   keepMounted = true,
   size = 'md',
   fit = 'content',
+  appearance = 'filled',
   motionPreset = 'subtle',
   motionDuration = 260,
   ariaLabel = 'Tabs',
@@ -508,6 +518,7 @@ export function ArcTabs({
     'arc-tabs',
     `arc-tabs--size-${size}`,
     `arc-tabs--fit-${fit}`,
+    `arc-tabs--appearance-${appearance}`,
     `arc-tabs--motion-${motionPreset}`,
     hasInteracted && 'arc-tabs--has-interacted',
     className,

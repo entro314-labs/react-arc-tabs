@@ -69,6 +69,10 @@
   --arc-panel-bg: #ffffff;
   --arc-panel-border: #cfd6f5;
   --arc-panel-padding: 1rem;
+  /* Flat appearance only: the hairline between two unselected tabs, and how far
+     it stops short of the tab's top and bottom edges. */
+  --arc-divider: var(--arc-panel-border);
+  --arc-divider-inset: 25%;
 
   width: 100%;
   color: var(--arc-text);
@@ -356,6 +360,42 @@
   box-shadow: var(--arc-surface-shadow);
 }
 
+/* Flat appearance - the browser model. An unselected tab has no box of its
+   own: its label sits on the strip and a hairline separates it from its
+   neighbour, so the selected tab is the only tab-shaped object in the strip.
+   Hover still raises the `--arc-tab-hover-bg` chip - that rule is more specific
+   than this one and sets the fill back. */
+.arc-tabs--appearance-flat .arc-tabs__tab:not([aria-selected='true']) {
+  --arc-tab-fill: transparent;
+  border-color: transparent;
+}
+
+/* The divider lives in the gap BEFORE a tab, centred on it, so only a tab that
+   follows another tab has one - the sliding indicator is a list child too, and
+   `:first-child` would have counted it. Logical properties, so it mirrors under
+   `dir="rtl"` with the strip. */
+.arc-tabs--appearance-flat .arc-tabs__item + .arc-tabs__item::before {
+  content: '';
+  position: absolute;
+  inset-block: var(--arc-divider-inset);
+  inset-inline-start: calc((var(--arc-gap) + var(--arc-border-width)) / -2);
+  inline-size: var(--arc-border-width);
+  background: var(--arc-divider);
+  pointer-events: none;
+  transition: opacity var(--arc-motion-duration) var(--arc-motion-easing);
+}
+
+/* A tab that has a shape - hovered or selected - is its own edge, and a hairline
+   beside it reads as a second one. Both of its dividers drop out: its own, and
+   the next tab's. Each selector repeats the `item + item` shape so it matches
+   the rule above in weight and wins by coming later. */
+.arc-tabs--appearance-flat .arc-tabs__item + .arc-tabs__item--selected::before,
+.arc-tabs--appearance-flat .arc-tabs__item--selected + .arc-tabs__item::before,
+.arc-tabs--appearance-flat .arc-tabs__item + .arc-tabs__item:hover::before,
+.arc-tabs--appearance-flat .arc-tabs__item:hover + .arc-tabs__item::before {
+  opacity: 0;
+}
+
 .arc-tabs__icon {
   display: inline-flex;
   line-height: 0;
@@ -409,6 +449,7 @@
 .arc-tabs--motion-none .arc-tabs__tab,
 .arc-tabs--motion-none .arc-tabs__tab::before,
 .arc-tabs--motion-none .arc-tabs__tab::after,
+.arc-tabs--motion-none .arc-tabs__item::before,
 .arc-tabs--motion-none .arc-tabs__active-indicator {
   transition: none;
 }
@@ -420,6 +461,7 @@
 
   .arc-tabs__tab::before,
   .arc-tabs__tab::after,
+  .arc-tabs__item::before,
   .arc-tabs__active-indicator {
     transition: none;
   }

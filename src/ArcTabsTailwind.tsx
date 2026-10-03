@@ -68,6 +68,7 @@ export function ArcTabsTailwind({
   keepMounted = true,
   size = 'md',
   fit = 'content',
+  appearance = 'filled',
   motionPreset = 'subtle',
   motionDuration = 260,
   ariaLabel = 'Tabs',
@@ -460,7 +461,7 @@ export function ArcTabsTailwind({
   ])
 
   const rootClassName = joinClassNames(
-    'arc-tabs-tw w-full isolate text-[var(--arc-text)] [--arc-radius:16px] [--arc-gap:2px] [--arc-strip-padding:4px] [--arc-seam-gap:0px] [--arc-border-width:1px] [--arc-tab-radius:max(0px,calc(var(--arc-radius)-var(--arc-strip-padding)))] [--arc-panel-corner-radius:max(0px,calc(var(--arc-radius)-(var(--arc-strip-padding)*2)))] [--arc-notch:var(--arc-tab-radius)] [--arc-notch-offset-y:100%] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-strip-bg:#edf1ff] [--arc-notch-bg:var(--arc-strip-bg)] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-motion-duration:260ms] [--arc-surface-shadow:0_1px_2px_rgba(15,23,42,0.08)] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-strip-bg:#26304d] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e] dark:[--arc-surface-shadow:0_1px_2px_rgba(2,8,20,0.52)]',
+    'arc-tabs-tw w-full isolate text-[var(--arc-text)] [--arc-radius:16px] [--arc-gap:2px] [--arc-strip-padding:4px] [--arc-seam-gap:0px] [--arc-border-width:1px] [--arc-tab-radius:max(0px,calc(var(--arc-radius)-var(--arc-strip-padding)))] [--arc-panel-corner-radius:max(0px,calc(var(--arc-radius)-(var(--arc-strip-padding)*2)))] [--arc-notch:var(--arc-tab-radius)] [--arc-notch-offset-y:100%] [--arc-accent:#5b4ff1] [--arc-text:#171a2c] [--arc-tab-bg:#e7ebff] [--arc-strip-bg:#edf1ff] [--arc-notch-bg:var(--arc-strip-bg)] [--arc-tab-hover-bg:#dce3ff] [--arc-panel-bg:#ffffff] [--arc-panel-border:#cfd6f5] [--arc-panel-padding:1rem] [--arc-divider:var(--arc-panel-border)] [--arc-divider-inset:25%] [--arc-motion-duration:260ms] [--arc-surface-shadow:0_1px_2px_rgba(15,23,42,0.08)] dark:[--arc-text:#edf1ff] dark:[--arc-tab-bg:#2c3555] dark:[--arc-strip-bg:#26304d] dark:[--arc-tab-hover-bg:#374268] dark:[--arc-panel-bg:#1c243b] dark:[--arc-panel-border:#46527e] dark:[--arc-surface-shadow:0_1px_2px_rgba(2,8,20,0.52)]',
     classNames?.root,
     className,
   )
@@ -562,6 +563,16 @@ export function ArcTabsTailwind({
               'relative',
               fit === 'equal' ? 'min-w-0 flex-1' : 'shrink-0',
               selected ? 'z-[4]' : 'z-[2]',
+              // Flat appearance: the hairline in the gap before a tab that follows another tab.
+              // It drops out beside a tab that has a shape - the selected one (known here) and
+              // the hovered one (a sibling selector) - on both of that tab's sides.
+              appearance === 'flat' &&
+                index > 0 &&
+                "before:pointer-events-none before:absolute before:content-[''] before:inset-y-[var(--arc-divider-inset)] before:start-[calc((var(--arc-gap)+var(--arc-border-width))*-0.5)] before:w-[var(--arc-border-width)] before:bg-[var(--arc-divider)] before:transition-opacity before:[transition-duration:var(--arc-motion-duration)] motion-reduce:before:transition-none hover:before:opacity-0 [li:hover+&]:before:opacity-0",
+              appearance === 'flat' &&
+                index > 0 &&
+                (selected || index === selectedIndex + 1) &&
+                'before:opacity-0',
               classNames?.item,
             )
 
@@ -589,6 +600,10 @@ export function ArcTabsTailwind({
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--arc-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--arc-panel-bg)]',
               // Disabled
               'disabled:cursor-not-allowed disabled:opacity-45',
+              // Flat appearance: an unselected tab has no box, only its label on the strip. The
+              // hover utility below carries more variants, so it still raises its chip.
+              appearance === 'flat' &&
+                'aria-[selected=false]:[--arc-tab-fill:transparent] aria-[selected=false]:border-transparent',
               // Hover (unselected, enabled only)
               'aria-[selected=false]:enabled:hover:[--arc-tab-fill:var(--arc-tab-hover-bg)]',
               // Active press (unselected, enabled) — snaps because transform
