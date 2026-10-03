@@ -124,7 +124,8 @@ export default function Page() {
 ### `ArcTabs` / `ArcTabsTailwind`
 
 - `items: ArcTabItem[]`
-- `value?: string`
+- `value?: string` (controlled; a value that matches no enabled item selects nothing, see
+  [Controlled selection](#controlled-selection))
 - `defaultValue?: string`
 - `onValueChange?: (value, item, index) => void`
 - `activationMode?: "automatic" | "manual"`
@@ -144,6 +145,21 @@ export default function Page() {
   interactive controls such as close/pin buttons — nested buttons inside the default `<button>`
   trigger are invalid HTML. The div trigger keeps full tab semantics: `role="tab"`, roving
   tabindex, arrow-key navigation, and Enter/Space activation in every activation mode)
+
+### Controlled selection
+
+With `value` set, the component shows exactly what it is given. A value that matches no enabled
+item selects nothing: no tab is `aria-selected`, `emptyState` renders where a panel would, and the
+first enabled tab keeps the tab stop, so the list is still reachable and the arrow keys still walk
+it. Use it for a strip whose tabs can all be inactive, such as open documents with none in view:
+
+```tsx
+<ArcTabs items={items} value={activeId ?? ""} onValueChange={setActiveId} />
+```
+
+Before 4.0 a controlled value with no match was clamped to the first enabled tab. If you relied on
+that, pass the first item's id yourself. Uncontrolled use is unchanged: an unusable `defaultValue`
+still falls back to the first enabled tab.
 
 By default, the component derives radii from concentric rules:
 

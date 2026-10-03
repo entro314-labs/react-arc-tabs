@@ -26,6 +26,12 @@ type CSSVarStyle = React.CSSProperties & Record<`--${string}`, string | number>
 
 export interface ArcTabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   items: ArcTabItem[]
+  /**
+   * Controlled selection. A value that matches no enabled item selects NOTHING: no tab is
+   * `aria-selected`, `emptyState` renders in place of a panel, and the first enabled tab keeps the
+   * tab stop so the list stays keyboard-reachable. Leave it `undefined` for uncontrolled use, where
+   * an unusable `defaultValue` falls back to the first enabled tab instead.
+   */
   value?: string
   defaultValue?: string
   onValueChange?: (value: string, item: ArcTabItem, index: number) => void
@@ -161,7 +167,11 @@ export function ArcTabs({
     [items, rawValue],
   )
 
-  const selectedIndex = strictSelectedIndex >= 0 ? strictSelectedIndex : firstEnabledIndex
+  // Controlled: `value` is the whole truth, so one that names no enabled tab selects nothing.
+  // Uncontrolled: there is no owner to ask, so an unusable value falls back to the first enabled
+  // tab and the effect below stores that id.
+  const selectedIndex =
+    strictSelectedIndex >= 0 ? strictSelectedIndex : isControlled ? -1 : firstEnabledIndex
 
   const selectedItem = selectedIndex >= 0 ? items[selectedIndex] : undefined
 
@@ -180,12 +190,12 @@ export function ArcTabs({
   const [focusedIndex, setFocusedIndex] = React.useState<number>(selectedIndex)
 
   React.useEffect(() => {
-    if (selectedIndex === -1) {
-      setFocusedIndex(-1)
-      return
-    }
-
-    if (focusedIndex < 0 || focusedIndex >= items.length || items[focusedIndex]?.disabled) {
+    // A focused tab that still exists keeps the roving index, selection or no selection - with
+    // nothing selected the arrow keys must still be able to walk the strip. Only a stale index is
+    // handed back to the selection (which may itself be -1).
+    const focusedIsUsable =
+      focusedIndex >= 0 && focusedIndex < items.length && !items[focusedIndex]?.disabled
+    if (!focusedIsUsable && focusedIndex !== selectedIndex) {
       setFocusedIndex(selectedIndex)
     }
   }, [focusedIndex, selectedIndex, items])
@@ -522,6 +532,11 @@ export function ArcTabs({
   const renderPanelContent = (item: ArcTabItem, state: ArcTabsRenderState) =>
     renderPanel ? renderPanel(item, state) : item.content
 
+  // The one tab the Tab key lands on: the focused tab, else the selected one, else - when a
+  // controlled value selects nothing - the first enabled tab, so the tablist stays reachable.
+  const tabStopIndex =
+    focusedIndex !== -1 ? focusedIndex : selectedIndex !== -1 ? selectedIndex : firstEnabledIndex
+
   return (
     <div className={rootClassName} style={themedStyle} {...rest}>
       <div ref={listScrollRef} className="arc-tabs__list-scroll">
@@ -551,11 +566,7 @@ export function ArcTabs({
             const panelId = `${baseId}-panel-${index}`
             const state: ArcTabsRenderState = { index, selected, disabled }
 
-            const tabIndexValue = disabled
-              ? -1
-              : focusedIndex === index || (focusedIndex === -1 && selected)
-                ? 0
-                : -1
+            const tabIndexValue = !disabled && index === tabStopIndex ? 0 : -1
 
             return (
               <li
